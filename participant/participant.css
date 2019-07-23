@@ -1,0 +1,74 @@
+td, li, label, p, .table-header {
+  font-size: 1.4em !important;
+}
+.info-header {
+  position: absolute;
+  top: 10px;
+}
+.nav {
+  position: absolute;
+  top: 150px;
+}
+.tab {
+  position: absolute;
+  width: 80%;
+  left: 220px;
+  top: 10px;
+}
+.info-header li {
+  line-height: 20px;
+}
+.control-group {
+  margin-left: -70px;
+}
+input[type=number] {
+  width: 40px;
+}
+.form-horizontal {
+  padding-bottom: 0;
+}
+.table-header {
+  font-weight: bold;
+  padding-left: 0;
+  padding-top: 10px;
+}
+h4.table-header {
+  float: left;
+  font-size: 120%;
+  padding-top: 10px;
+}
+td {
+  padding-left: 25px;
+}
+.plot {
+  width: 800px;
+  height: 250px;
+}
+table {
+  float: left; 
+}
+#fanplot {
+  float: right;
+  width: 500px;
+  height: 250px;
+  margin-top: 60px;
+}
+.invisible {
+  visibility: hidden; 
+}
+.red {
+  color: #cc0000;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button,
+input::-moz-outer-spin-button,
+input::-moz-inner-spin-button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+/* will bold the current table rows
+.curr td:not(.table-header) {
+  font-weight: bold;
+}
+*/
