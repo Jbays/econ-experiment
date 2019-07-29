@@ -154,7 +154,6 @@ function setupSubjectList() {
 
 var session_started = false;
 $(function() {
-  
   $("#start-session").click(function() {
     $.ajaxSetup({async:false});
     for (var i in r.subjects) { 
@@ -238,5 +237,4 @@ $(function() {
   
   setTimeout(setupSubjectList, 500);
   setInterval(function() { update(subjectGrid); }, 1000);
-
 });
