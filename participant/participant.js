@@ -10,9 +10,7 @@
 ROBOTS = false;
 var rand;
 
-// helper function to append point p to array a
-// used in charts where points must be sequential, e.g.
-// [[0, y1], [1, y2], [2, y3], ...]
+// helper function to append point p to array a used in charts where points must be sequential, e.g. [[0, y1], [1, y2], [2, y3], ...]
 var append = function(a, p, s) {
   if (a.length === 0) {
     if (s !== undefined) {
@@ -65,9 +63,7 @@ function rand_shock() {
   return rand.normal(0, r.config.shock_stddev);
 }
 
-// return true iff you have the minimum username of your group
-// useful so that only one person (the minimum) in a group send a message for the
-// whole group, acting as a sort of coordinator
+// return true iff you have the minimum username of your group.  useful so that only one person (the minimum) in a group send a message for the.  whole group, acting as a sort of coordinator
 function min_group() {
   group = [];
   for (var subject in r.groups) {
@@ -149,12 +145,70 @@ var interest_rate_series = [[-4, 0], [-3,0], [-2, 0], [-1, 0], [0, 0]];
 
 var shockarray;
 
-
 //PRACTICE SEQUENCE:
 //CHANGE THE SHOCK ARRAY AND PERIOD 1 OF THE SHOCK_SERIES:
 shockarray = [8,83,-131,-29,-40,-146,-88,-299,-449,-410,-364,-361,-432,-208,-328,-172,5,3,14,-42,-218,-130,52,257,90,-162,-70,9,-25,-164];
 
 var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,8]];
+
+//SHOCK SEQUENCE 1:
+//Sequence 1a:
+//shockarray = [133,59,-60,143,52,-48,-66,-148,-231,199,330,229,-34,-133,-99,47,-148,-389,-412,-191,-58,26,-2,23,-49,85,-130,-15,-119,-112];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,133]];
+
+//Sequence 1b:
+//shockarray = [24,-191,-120,142,94,59,-63,-40,8,60,-14,-39,243,-157,202,160,222,-92,-129,-110,-7,-223,-65,-196,-103,27,58,175,231,47];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,24]];
+
+
+//SHOCK SEQUENCE 3:
+//Sequence 3a:
+//shockarray = [-70,181,-12,-70,-133,-230,-156,-125,129,41,-116,144,244,109,-135,-135,-98,-19,-45,32,70,-124,-195,-208,-185,-148,-82,-444,-313,-16];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-70]];
+
+//Sequence 3b:
+//shockarray = [-140,43,70,36,45,-180,-113,145,96,60,-62,-39,8,60,-14,-39,243,-157,202,160,222,-91,-129,-110,-7,-223,-65,-196,-103,27];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-140]];
+
+//SHOCK SEQUENCE 5:
+//Sequence 5a:
+//shockarray = [116,-84,-188,-213,-507,-101,-15,-107,118,-157,-103,-90,-10,36,-93,-57,-54,51,173,244,26,25,-145,-228,-131,126,-29,32,-11,140];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,116]];
+
+//Sequence 5b:
+//shockarray = [10,-118,-14,81,159,0,59,47,135,147,201,98,36,153,-191,-175,-266,-202,-30,91,-81,-108,-44,-63,4,54,-91,-75,-322,-34];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,10]];
+
+
+
+//SHOCK SEQUENCE 2:
+//Sequence 2a:
+//shockarray = [-140,43,70,36,45,-180,-113,145,96,60,-62,-39,8,60,-14,-39,243,-157,202,160,222,-91,-129,-110,-7,-223,-65,-196,-103,27];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-140]];
+
+//Sequence 2b:
+shockarray = [-143,-77,28,160,294,179,-94,-151,-225,180,22,110,38,138,-22,-196,-298,-106,-84,-73,144,120,95,262,44,116,176,68,67,-114];
+var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-143]];
+
+
+//SHOCK SEQUENCE 4:
+//Sequence 4a:
+//shockarray = [112,-179,-129,-38,-107,1,-9,-128,-52,-65,-91,-145,-74,-284,-214,-193,-230,-45,-122,1,129,53,66,122,59,104,-106,85,-81,-286];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,112]];
+
+//Sequence 4b:
+//shockarray = [191,378,231,2,158,12,-54,85,-133,-332,-134,-24,-1,64,178,229,56,138,101,-8,-161,-7,-50,-23,-117,-270,-131,-83,110,168];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,191]];
+
+//SHOCK SEQUENCE 6:
+//Sequence 6a:
+//shockarray = [-70,181,-12,-70,-133,-230,-156,-125,129,41,-116,144,244,109,-135,-135,-98,-19,-45,32,70,-124,-195,-208,-185,-148,-82,-444,-313,-16];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-70]];
+
+//Sequence 6b:
+//shockarray = [-82,-205,-150,-273,-158,-164,192,259,-180,-45,-209,-152,-65,61,-1,206,54,74,129,85,164,136,-25,-251,100,-22,1,74,57,-86];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-82]];
+
 
 //Pi-star Inflation target
 var pistar_WR_series = [[-1, 0], [0, 0]];
@@ -162,8 +216,7 @@ var nextpistar_WR_series = [[-1, 0], [0, 0], [1,0]];
 //Old output gap Change
 var old_x_change_series = [[-2, 0], [-1, 0], [0, 0]];
 
-// Updates the plots when series data changes
-// Automatically sets axis min/max to display all data
+// Updates the plots when series data changes Automatically sets axis min/max to display all data
 function replot() {
   var opts = {
     series: {
@@ -193,6 +246,7 @@ function replot() {
   var green = "#00ff00";
   var orange = "#FFA500";
 
+  
   // the interest fan plot, yes, this is recomputed every time we replot
   var interest_fan = [];
   var interest_fanfill = [];
@@ -244,6 +298,7 @@ function replot() {
     inflation_fanfill.push([tt+nn, pi_tn + pi_stddev, pi_tn - pi_stddev]);
   }
   
+  
   $.plot($("#fanplot"), [
     {
       data: inflation_fan,
@@ -276,22 +331,21 @@ function replot() {
   var shock_t1 = shock_series[shock_series.length-2] [1];
 
   for (var nx = 1; nx <= r.config.forecast_length; nx++) {
-    if ( nx==1 ){  
+    if(nx==1){  
       var x_tn =  r.config.AX1*shock_t1 +r.config.BX1*x_t1 + r.config.CX1*pi_t1 + r.config.DX1*(shock_t-r.config.p*shock_t1);
     }
-    if ( nx==2 ){  
+    if(nx==2){  
       var x_tn =  r.config.AX2*shock_t1 +r.config.BX2*x_t1 + r.config.CX2*pi_t1 + r.config.DX2*(shock_t-r.config.p*shock_t1);
     }
-    if ( nx==3 ){  
+    if(nx==3){  
       var x_tn = r.config.AX3*shock_t1 +r.config.BX3*x_t1 + r.config.CX3*pi_t1 + r.config.DX3*(shock_t-r.config.p*shock_t1);
     }
-    if ( nx==4 ){  
+    if(nx==4){  
       var x_tn = r.config.AX4*shock_t1 +r.config.BX4*x_t1 + r.config.CX4*pi_t1 + r.config.DX4*(shock_t-r.config.p*shock_t1);
     }
-    if ( nx==5 ){  
+    if(nx==5){  
       var x_tn = r.config.AX5*shock_t1 +r.config.BX5*x_t1 + r.config.CX5*pi_t1 + r.config.DX5*(shock_t-r.config.p*shock_t1);
     }
-
     output_fan.push([tx+nx, x_tn]);
     var x_stddev = r.config.shock_stddev * Math.sqrt(nx);
     output_fanfill.push([tx+nx, x_tn + x_stddev, x_tn - x_stddev]);
@@ -314,8 +368,8 @@ function replot() {
   ], opts);
   
   opts.legend.container = "#plot1-legend"; // places the legend outside the plot, in the DOM
-  if ( r.config.pifcst==0 ){ 
-     $.plot($("#plot1"), [
+  if(r.config.pifcst==0){ 
+    $.plot($("#plot1"), [
       {
         data: inflation_series,
         color: red,
@@ -328,7 +382,7 @@ function replot() {
       }
     ], opts);
   }
-  if ( r.config.pifcst==1 ){ 
+  if(r.config.pifcst==1){ 
     $.plot($("#plot1"), [
       { 
         data: inflation_fan,
@@ -342,7 +396,9 @@ function replot() {
         lines: {show: true, lineWidth: 0, fill: 0.2},
         points: {show: false},
         hoverable: false
+
       },
+      
       {
         data: inflation_series,
         color: red,
@@ -358,7 +414,7 @@ function replot() {
   
   opts.legend.container = "#plot2-legend";
   
-  if ( r.config.xfcst==0 ){
+  if(r.config.xfcst==0){
     $.plot($("#plot2"), [
       {
         data: output_series,
@@ -372,7 +428,8 @@ function replot() {
       }
     ], opts);
   }
-  if ( r.config.xfcst==1 ) {
+  
+  if(r.config.xfcst==1){
     $.plot($("#plot2"), [
       { 
         data: output_fan,
@@ -380,12 +437,14 @@ function replot() {
         label: "Central Bank's Output Forecast",
         lines: {fillBetween: true}
       },
+      
       {
         data: output_fanfill,
         color: green,
         lines: {show: true, lineWidth: 0, fill: 0.2},
         points: {show: false},
         hoverable: false
+
       },
       {
         data: output_series,
@@ -402,21 +461,22 @@ function replot() {
   
   opts.legend.container = "#plot3-legend";
 
-  if ( r.config.irfcst==0 ){
+  if(r.config.irfcst==0){
     $.plot($("#plot3"), [
-      {
-        data: shock_series,
-        label: "Shock"
-      },
-      {
-        data: interest_rate_series,
-        label: "Interest Rate"
-      }
+        {
+      data: shock_series,
+      label: "Shock"
+    },
+    {
+      data: interest_rate_series,
+      label: "Interest Rate"
+    }
+    
     ], opts);
     opts.legend.container = null;
   }
   
-  if ( r.config.irfcst==1 ){
+  if(r.config.irfcst==1){
     $.plot($("#plot3"), [
       { 
         data: interest_fan,
@@ -442,6 +502,7 @@ function replot() {
     ], opts);
     opts.legend.container = null;
   }
+
 }
 
 // show the current tab, hide all others
@@ -486,7 +547,8 @@ function setup_tooltip() {
         }
         showTooltip(item.pageX, item.pageY, label);
       }
-    } else {
+    }
+    else {
       $("#tooltip").remove();
       previousPoint = null;            
     }
@@ -508,9 +570,7 @@ function all_forecasts_in() {
   return all_in;
 }
 
-// called when a new forecast comes in
-// updates the plots, checks if all forecasts are now in, sending a
-// new shock if subject receiving it is the "coordinator" (see min_group)
+// called when a new forecast comes in updates the plots, checks if all forecasts are now in, sending a new shock if subject receiving it is the "coordinator" (see min_group)
 function handle_forecast(msg) {
   if (msg.Sender === r.username) {
     $("input").attr("disabled", "disabled");
@@ -530,6 +590,7 @@ function handle_forecast(msg) {
   if (all_forecasts_in()) {
     $("#inflation_input").val("");
     $("#inflationfour_input").val("");
+
     $("#output_input").val("");
     var subperiod = $(".period").text();
     if (subperiod === "") {
@@ -551,62 +612,87 @@ function handle_forecast(msg) {
   }
 }
 
-// handles a new shock
-// calculates variables given previous forecasts
-// unlocks inputs for next forecast, unless all subperiods are finished
+// handles a new shock calculates variables given previous forecasts unlocks inputs for next forecast, unless all subperiods are finished
 function handle_shock(msg) {
+  
   last_shock = msg;
+
   var curr_shock_size = msg.Value.shock;
   var last_shock_size = Math.round(parseFloat($(".curr_shock_size").text(), 10));
   $(".curr_shock_size").text(curr_shock_size);
   $(".expected_shock_size").text(Math.round(r.config.p * curr_shock_size));
   append(shock_series, msg.Value.shock);
+  
   var subperiod = parseInt($(".period").text(), 10);
   
   if (all_forecasts_in()) {
     var inflation_forecasts = [];
-    var inflationfour_forecasts = [];
+var inflationfour_forecasts = [];
     var output_forecasts = [];
     for (var subject in forecasts) {
       if (forecasts[subject].inflation !== null && forecasts[subject].output !== null) {
         inflation_forecasts.push(forecasts[subject].inflation);
-        inflationfour_forecasts.push(forecasts[subject].inflationfour);
+inflationfour_forecasts.push(forecasts[subject].inflationfour);
         output_forecasts.push(forecasts[subject].output);
       }
     }
     var e_i = median(inflation_forecasts); 
-    var e_i_four = median(inflationfour_forecasts);
+var e_i_four = median(inflationfour_forecasts);
     var e_o = median(output_forecasts);
+    
     var last_e_i = e_i_series[e_i_series.length - 1][1];
     var last_e_o = e_o_series[e_o_series.length - 1][1];
     var last_interest_rate = interest_rate_series[interest_rate_series.length - 1][1];
     var last_inflation = inflation_series[inflation_series.length - 1][1];
     var last_output = output_series[output_series.length - 1][1];
+    
     var old_x_change = last_output - output_series[output_series.length - 2][1];
-    var last_pistar = pistar_WR_series[pistar_WR_series.length - 1][1];
-    var pistar_WR = ((last_pistar - last_inflation)/r.config.beta)  -  (r.config.lambda/(r.config.kappa*r.config.beta))*(old_x_change) - (r.config.lambda*r.config.sigma/r.config.beta)*last_output;
-    var testershock = shockarray[subperiod-2];
-    var inflation = (r.config.D*e_o) + (r.config.E*e_i) + (r.config.F*testershock);
-    var output = (r.config.A*e_o) + (r.config.B*e_i) + (r.config.C*testershock);
-    var interest_rate =  (r.config.G*e_o) + (r.config.H*e_i) + (r.config.I*testershock);
-    var nextpistar_WR = ((pistar_WR - inflation)/r.config.beta)  -  (r.config.lambda/(r.config.kappa*r.config.beta))*(output-last_output) - (r.config.lambda*r.config.sigma/r.config.beta)*output;
-    pistar_WR = Math.round(pistar_WR);
-    nextpistar_WR = Math.round(nextpistar_WR);
+     var last_pistar = pistar_WR_series[pistar_WR_series.length - 1][1];
+     var pistar_WR = ((last_pistar - last_inflation)/r.config.beta)  -  (r.config.lambda/(r.config.kappa*r.config.beta))*(old_x_change) - (r.config.lambda*r.config.sigma/r.config.beta)*last_output;
+
+var testershock = shockarray[subperiod-2];
+
+var inflation = (r.config.D*e_o) + (r.config.E*e_i) + (r.config.F*testershock);
+var output = (r.config.A*e_o) + (r.config.B*e_i) + (r.config.C*testershock);
+var interest_rate =  (r.config.G*e_o) + (r.config.H*e_i) + (r.config.I*testershock);
+
+//if(r.config.woodfordrule==1){
+//var inflation = r.config.G*((r.config.H*e_i) + (r.config.B*e_o) + (r.config.D*pistar_WR) + (r.config.F*testershock));
+//var output = r.config.A*((r.config.B*e_o) + (r.config.C*e_i) + (r.config.F*testershock) + (r.config.D*pistar_WR));
+//var interest_rate = r.config.rstar + r.config.phi*(inflation-pistar_WR) + r.config.gamma*output;
+//}
+    
+//if(interest_rate<0){interest_rate=0;
+//var output =  e_o - (interest_rate - e_i - testershock - r.config.rstar)/r.config.sigma;
+//var inflation = (r.config.beta*e_i) + (r.config.kappa*output);
+//}
+
+var nextpistar_WR = ((pistar_WR - inflation)/r.config.beta)  -  (r.config.lambda/(r.config.kappa*r.config.beta))*(output-last_output) - (r.config.lambda*r.config.sigma/r.config.beta)*output;
+
+pistar_WR = Math.round(pistar_WR);
+nextpistar_WR = Math.round(nextpistar_WR);
+
     interest_rate = Math.round(interest_rate);
     output = Math.round(output);
     inflation = Math.round(inflation);
+
+    
     append(e_i_series, e_i);
     append(e_o_series, e_o);
     append(inflation_series, inflation);
     append(output_series, output);
     append(pistar_WR_series, pistar_WR); 
 
+
+
+    
     if (r.username in old_forecasts) {
       if (old_forecasts[r.username].inflation === null || old_forecasts[r.username].output === null) {
         r.send("points", 0, {period: 0, group: 0});
         
         $(".last_inflation_forecast").text("N/A");
-        $(".last_inflationfour_forecast").text("N/A");
+$(".last_inflationfour_forecast").text("N/A");
+
         $(".last_output_forecast").text("N/A");
         $(".last_inflation_forecast_error").text("N/A");
         $(".last_output_forecast_error").text("N/A");
@@ -615,15 +701,17 @@ function handle_shock(msg) {
         // use forecast from 2 periods ago, not 1
         E_inflation = parseInt(old_forecasts[r.username].inflation, 10);
         E_output = parseInt(old_forecasts[r.username].output, 10);
-        E_inflationfour = 100;
+E_inflationfour = 100;
+
         var score =
           r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation - inflation)) +
           r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_output - output));
           
         r.set_points(r.points + score);
         r.send("points", score, {period: 0, group: 0, subperiod: subperiod});
+        
         $(".last_inflation_forecast").text(E_inflation.toFixed(0));
-        $(".last_inflationfour_forecast").text(E_inflationfour.toFixed(0));
+$(".last_inflationfour_forecast").text(E_inflationfour.toFixed(0));
 
         $(".last_output_forecast").text(E_output.toFixed(0));
         $(".last_inflation_forecast_error").text(Math.abs(E_inflation - inflation).toFixed(0));
@@ -638,9 +726,16 @@ function handle_shock(msg) {
     }
     $(".last_inflation").text(inflation);
     $(".last_output").text(output);
-    var next_interest_rate = interest_rate;
-    $(".nextpistar_WR").text(nextpistar_WR);
-    append(nextpistar_WR_series, nextpistar_WR);
+
+var next_interest_rate = interest_rate;
+
+
+$(".nextpistar_WR").text(nextpistar_WR);
+append(nextpistar_WR_series, nextpistar_WR);
+
+
+
+
     $(".curr_interest_rate").text(next_interest_rate);
     append(interest_rate_series, next_interest_rate);
     if (min_group()) {
@@ -656,8 +751,9 @@ function handle_shock(msg) {
         inflation: inflation,
         next_interest_rate: next_interest_rate,
         pistar_WR: pistar_WR,
-        nextpistar_WR: nextpistar_WR,
+nextpistar_WR: nextpistar_WR,
         old_x_change: old_x_change
+        
 
       });
     }
@@ -669,8 +765,8 @@ function handle_shock(msg) {
     update_input_state_ticker();
     if (ROBOTS && !r.__sync__.in_progress) {
       robot = setTimeout(function() {
-        var inflation = rand.uniform(40, -50); 
-        var inflationfour = rand.uniform(40,-50);
+       var inflation = rand.uniform(40, -50); 
+       var inflationfour = rand.uniform(40,-50);
         var output = rand.uniform(40, -50); 
         r.send("forecast", { subperiod: subperiod, inflation: inflation, output: output });
         r.send("progress", { period: r.period, subperiod: subperiod, forecast: true}, {period: 0, group: 0});
@@ -684,11 +780,11 @@ function handle_shock(msg) {
   }
 }
 
-// finish_sync is called on page refresh, when redwood is done loading the queue
-// it initializes variables, inputs, and some display variables
+// finish_sync is called on page refresh, when redwood is done loading the queue it initializes variables, inputs, and some display variables
 var last_shock;
 function finish_sync() {
   $("#pdf_content").attr("data", r.config.instructions_url);
+  
   var c = document.location.pathname.split('/');
   $(".subject").text(c[c.length - 1].split("@")[0]);
   $("#submit_input").click(function() {
@@ -795,7 +891,7 @@ function finish_sync() {
       $(".time_remaining").text("Time Remaining: 0");
       $(".time_remaining,.prompt").toggleClass("red");
       if (r.config.block === false && secondsLeft <= -5) {
-        r.send("forecast", { inflation: NaN, inflationfour: NaN, output: NaN });
+      r.send("forecast", { inflation: NaN, inflationfour: NaN, output: NaN });
         var subperiod = parseInt($(".period").text(), 10);
         r.send("progress", {period: r.period, subperiod: subperiod, forecast: true}, {period: 0, group: 0});
       }
@@ -827,8 +923,7 @@ function finish_sync() {
   }
 }
 
-// sets up random number generator and attaches handlers, called once when page
-// loads
+// sets up random number generator and attaches handlers, called once when page loads
 $(function() {
   rand = new Random();
   
@@ -850,3 +945,8 @@ $(function() {
   
   setup_tooltip();
 });
+
+
+
+
+
