@@ -82,6 +82,7 @@ function min_group() {
 
 // sends a summary message with how long subjects has been on each of the three tabs
 function send_tab_summary() {
+  console.log("send_tab_summary invoked")
   var last_time;
   var tab_times = {
     "forecast": 0,
@@ -111,6 +112,7 @@ function send_tab_summary() {
 
 // displayes the plot tooltip when a point is hovered over
 function showTooltip(x, y, contents) {
+  console.log("showTooltip invoked")
   $('<div id="tooltip">' + contents + '</div>').css({
     position: 'absolute',
     display: 'none',
@@ -218,6 +220,7 @@ var old_x_change_series = [[-2, 0], [-1, 0], [0, 0]];
 
 // Updates the plots when series data changes Automatically sets axis min/max to display all data
 function replot() {
+  console.log("replot invoked")
   var opts = {
     series: {
       lines: { show: true },
@@ -414,49 +417,52 @@ function replot() {
   
   opts.legend.container = "#plot2-legend";
   
+
   if(r.config.xfcst==0){
-    $.plot($("#plot2"), [
-      {
-        data: output_series,
-        color: red,
-        label: "Output"
-      },
-      {
-        data: output_forecast_series,
-        color: blue,
-        label: "Output Forecast"
-      }
-    ], opts);
+    console.log('trying to change plot 2 -- but nothing. r.config.xfcst === 0')
+    // $.plot($("#plot2"), [
+    //   {
+    //     data: output_series,
+    //     color: red,
+    //     label: "Output"
+    //   },
+    //   {
+    //     data: output_forecast_series,
+    //     color: blue,
+    //     label: "Output Forecast"
+    //   }
+    // ], opts);
   }
   
   if(r.config.xfcst==1){
-    $.plot($("#plot2"), [
-      { 
-        data: output_fan,
-        color: green,
-        label: "Central Bank's Output Forecast",
-        lines: {fillBetween: true}
-      },
+    console.log('trying to change plot 2 -- but nothing. r.config.xfcst === 1')
+    // $.plot($("#plot2"), [
+    //   { 
+    //     data: output_fan,
+    //     color: green,
+    //     label: "Central Bank's Output Forecast",
+    //     lines: {fillBetween: true}
+    //   },
       
-      {
-        data: output_fanfill,
-        color: green,
-        lines: {show: true, lineWidth: 0, fill: 0.2},
-        points: {show: false},
-        hoverable: false
+    //   {
+    //     data: output_fanfill,
+    //     color: green,
+    //     lines: {show: true, lineWidth: 0, fill: 0.2},
+    //     points: {show: false},
+    //     hoverable: false
 
-      },
-      {
-        data: output_series,
-        color: red,
-        label: "Output"
-      },
-      {
-        data: output_forecast_series,
-        color: blue,
-        label: "Output Forecast"
-      }
-    ], opts);
+    //   },
+    //   {
+    //     data: output_series,
+    //     color: red,
+    //     label: "Output"
+    //   },
+    //   {
+    //     data: output_forecast_series,
+    //     color: blue,
+    //     label: "Output Forecast"
+    //   }
+    // ], opts);
   }
   
   opts.legend.container = "#plot3-legend";
@@ -507,6 +513,7 @@ function replot() {
 
 // show the current tab, hide all others
 function update_tab_nav() {
+  console.log("update_tab_nav invoked");
   var tab_id = document.location.hash.substr(1);
   if (tab_id !== "") {
     $(".tab").css("visibility", "hidden");
@@ -528,6 +535,7 @@ function update_tab_nav() {
 }
 
 function setup_tooltip() {
+  console.log("setup_tooltip invoked");
   var previousPoint = null;
   $(".plot").bind("plothover", function(event, pos, item) {
     if (item) {
@@ -560,6 +568,7 @@ var forecasts = {};
 
 // returns true iff all subjects in group have sent in a forecast
 function all_forecasts_in() {
+  console.log("all_forecasts_in invoked");
   var all_in = true;
   var subject;
   for (subject in r.groups) {
@@ -572,13 +581,14 @@ function all_forecasts_in() {
 
 // called when a new forecast comes in updates the plots, checks if all forecasts are now in, sending a new shock if subject receiving it is the "coordinator" (see min_group)
 function handle_forecast(msg) {
+  console.log("handle_forecast invoked");
   if (msg.Sender === r.username) {
     $("input").attr("disabled", "disabled");
     $("#submit_input").attr("disabled", "disabled");
     $(".input-state").text("Please wait for group to finish...");
     $("#inflation_input").val(parseFloat(msg.Value.inflation).toFixed(0));
     $("#inflationfour_input").val(parseFloat(msg.Value.inflationfour).toFixed(0));
-    $("#output_input").val(parseFloat(msg.Value.output).toFixed(0));
+    $("#inflation_2_input").val(parseFloat(msg.Value.output).toFixed(0));
     $("form p").text("Please wait for others to submit their forecasts.");
     append(inflation_forecast_series, msg.Value.inflation, 2);
     append(inflationfour_forecast_series, msg.Value.inflationfour, 5);
@@ -591,7 +601,7 @@ function handle_forecast(msg) {
     $("#inflation_input").val("");
     $("#inflationfour_input").val("");
 
-    $("#output_input").val("");
+    $("#inflation_2_input").val("");
     var subperiod = $(".period").text();
     if (subperiod === "") {
       subperiod = 0;
@@ -614,7 +624,7 @@ function handle_forecast(msg) {
 
 // handles a new shock calculates variables given previous forecasts unlocks inputs for next forecast, unless all subperiods are finished
 function handle_shock(msg) {
-  
+  console.log("handle_shock invoked");
   last_shock = msg;
 
   var curr_shock_size = msg.Value.shock;
@@ -627,17 +637,17 @@ function handle_shock(msg) {
   
   if (all_forecasts_in()) {
     var inflation_forecasts = [];
-var inflationfour_forecasts = [];
+    var inflationfour_forecasts = [];
     var output_forecasts = [];
     for (var subject in forecasts) {
       if (forecasts[subject].inflation !== null && forecasts[subject].output !== null) {
         inflation_forecasts.push(forecasts[subject].inflation);
-inflationfour_forecasts.push(forecasts[subject].inflationfour);
+        inflationfour_forecasts.push(forecasts[subject].inflationfour);
         output_forecasts.push(forecasts[subject].output);
       }
     }
     var e_i = median(inflation_forecasts); 
-var e_i_four = median(inflationfour_forecasts);
+    var e_i_four = median(inflationfour_forecasts);
     var e_o = median(output_forecasts);
     
     var last_e_i = e_i_series[e_i_series.length - 1][1];
@@ -647,35 +657,23 @@ var e_i_four = median(inflationfour_forecasts);
     var last_output = output_series[output_series.length - 1][1];
     
     var old_x_change = last_output - output_series[output_series.length - 2][1];
-     var last_pistar = pistar_WR_series[pistar_WR_series.length - 1][1];
-     var pistar_WR = ((last_pistar - last_inflation)/r.config.beta)  -  (r.config.lambda/(r.config.kappa*r.config.beta))*(old_x_change) - (r.config.lambda*r.config.sigma/r.config.beta)*last_output;
+    var last_pistar = pistar_WR_series[pistar_WR_series.length - 1][1];
+    var pistar_WR = ((last_pistar - last_inflation)/r.config.beta)  -  (r.config.lambda/(r.config.kappa*r.config.beta))*(old_x_change) - (r.config.lambda*r.config.sigma/r.config.beta)*last_output;
 
-var testershock = shockarray[subperiod-2];
+    var testershock = shockarray[subperiod-2];
 
-var inflation = (r.config.D*e_o) + (r.config.E*e_i) + (r.config.F*testershock);
-var output = (r.config.A*e_o) + (r.config.B*e_i) + (r.config.C*testershock);
-var interest_rate =  (r.config.G*e_o) + (r.config.H*e_i) + (r.config.I*testershock);
+    var inflation = (r.config.D*e_o) + (r.config.E*e_i) + (r.config.F*testershock);
+    var output = (r.config.A*e_o) + (r.config.B*e_i) + (r.config.C*testershock);
+    var interest_rate =  (r.config.G*e_o) + (r.config.H*e_i) + (r.config.I*testershock);
 
-//if(r.config.woodfordrule==1){
-//var inflation = r.config.G*((r.config.H*e_i) + (r.config.B*e_o) + (r.config.D*pistar_WR) + (r.config.F*testershock));
-//var output = r.config.A*((r.config.B*e_o) + (r.config.C*e_i) + (r.config.F*testershock) + (r.config.D*pistar_WR));
-//var interest_rate = r.config.rstar + r.config.phi*(inflation-pistar_WR) + r.config.gamma*output;
-//}
-    
-//if(interest_rate<0){interest_rate=0;
-//var output =  e_o - (interest_rate - e_i - testershock - r.config.rstar)/r.config.sigma;
-//var inflation = (r.config.beta*e_i) + (r.config.kappa*output);
-//}
+    var nextpistar_WR = ((pistar_WR - inflation)/r.config.beta)  -  (r.config.lambda/(r.config.kappa*r.config.beta))*(output-last_output) - (r.config.lambda*r.config.sigma/r.config.beta)*output;
 
-var nextpistar_WR = ((pistar_WR - inflation)/r.config.beta)  -  (r.config.lambda/(r.config.kappa*r.config.beta))*(output-last_output) - (r.config.lambda*r.config.sigma/r.config.beta)*output;
-
-pistar_WR = Math.round(pistar_WR);
-nextpistar_WR = Math.round(nextpistar_WR);
+    pistar_WR = Math.round(pistar_WR);
+    nextpistar_WR = Math.round(nextpistar_WR);
 
     interest_rate = Math.round(interest_rate);
     output = Math.round(output);
     inflation = Math.round(inflation);
-
     
     append(e_i_series, e_i);
     append(e_o_series, e_o);
@@ -683,16 +681,13 @@ nextpistar_WR = Math.round(nextpistar_WR);
     append(output_series, output);
     append(pistar_WR_series, pistar_WR); 
 
-
-
     
     if (r.username in old_forecasts) {
       if (old_forecasts[r.username].inflation === null || old_forecasts[r.username].output === null) {
         r.send("points", 0, {period: 0, group: 0});
         
         $(".last_inflation_forecast").text("N/A");
-$(".last_inflationfour_forecast").text("N/A");
-
+        $(".last_inflationfour_forecast").text("N/A");
         $(".last_output_forecast").text("N/A");
         $(".last_inflation_forecast_error").text("N/A");
         $(".last_output_forecast_error").text("N/A");
@@ -701,7 +696,7 @@ $(".last_inflationfour_forecast").text("N/A");
         // use forecast from 2 periods ago, not 1
         E_inflation = parseInt(old_forecasts[r.username].inflation, 10);
         E_output = parseInt(old_forecasts[r.username].output, 10);
-E_inflationfour = 100;
+        E_inflationfour = 100;
 
         var score =
           r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation - inflation)) +
@@ -711,7 +706,7 @@ E_inflationfour = 100;
         r.send("points", score, {period: 0, group: 0, subperiod: subperiod});
         
         $(".last_inflation_forecast").text(E_inflation.toFixed(0));
-$(".last_inflationfour_forecast").text(E_inflationfour.toFixed(0));
+        $(".last_inflationfour_forecast").text(E_inflationfour.toFixed(0));
 
         $(".last_output_forecast").text(E_output.toFixed(0));
         $(".last_inflation_forecast_error").text(Math.abs(E_inflation - inflation).toFixed(0));
@@ -727,14 +722,10 @@ $(".last_inflationfour_forecast").text(E_inflationfour.toFixed(0));
     $(".last_inflation").text(inflation);
     $(".last_output").text(output);
 
-var next_interest_rate = interest_rate;
+    var next_interest_rate = interest_rate;
 
-
-$(".nextpistar_WR").text(nextpistar_WR);
-append(nextpistar_WR_series, nextpistar_WR);
-
-
-
+    $(".nextpistar_WR").text(nextpistar_WR);
+    append(nextpistar_WR_series, nextpistar_WR);
 
     $(".curr_interest_rate").text(next_interest_rate);
     append(interest_rate_series, next_interest_rate);
@@ -751,10 +742,8 @@ append(nextpistar_WR_series, nextpistar_WR);
         inflation: inflation,
         next_interest_rate: next_interest_rate,
         pistar_WR: pistar_WR,
-nextpistar_WR: nextpistar_WR,
+        nextpistar_WR: nextpistar_WR,
         old_x_change: old_x_change
-        
-
       });
     }
   }
@@ -765,8 +754,8 @@ nextpistar_WR: nextpistar_WR,
     update_input_state_ticker();
     if (ROBOTS && !r.__sync__.in_progress) {
       robot = setTimeout(function() {
-       var inflation = rand.uniform(40, -50); 
-       var inflationfour = rand.uniform(40,-50);
+        var inflation = rand.uniform(40, -50); 
+        var inflationfour = rand.uniform(40,-50);
         var output = rand.uniform(40, -50); 
         r.send("forecast", { subperiod: subperiod, inflation: inflation, output: output });
         r.send("progress", { period: r.period, subperiod: subperiod, forecast: true}, {period: 0, group: 0});
@@ -783,6 +772,7 @@ nextpistar_WR: nextpistar_WR,
 // finish_sync is called on page refresh, when redwood is done loading the queue it initializes variables, inputs, and some display variables
 var last_shock;
 function finish_sync() {
+  console.log("finish_sync invoked");
   $("#pdf_content").attr("data", r.config.instructions_url);
   
   var c = document.location.pathname.split('/');
@@ -800,6 +790,7 @@ function finish_sync() {
     } else {
       $("#inflation_input").closest(".control-group").removeClass("error");
     }
+
     var inflationfour = $("#inflationfour_input").val();
     $(".help-inline").remove();
     if (inflationfour === "") {
@@ -812,16 +803,17 @@ function finish_sync() {
       $("#inflationfour_input").closest(".control-group").removeClass("error");
     }
 
-    var output = $("#output_input").val();
+    var output = $("#inflation_2_input").val();
     if (output === "") {
-      $("#output_input").closest(".control-group").addClass("error");
+      $("#inflation_2_input").closest(".control-group").addClass("error");
       help = $("<span>").
         addClass("help-inline").
         text("Please input your output estimate");
-      $("#output_input").after(help);
+      $("#inflation_2_input").after(help);
     } else {
-      $("#output_input").closest(".control-group").removeClass("error");
+      $("#inflation_2_input").closest(".control-group").removeClass("error");
     }
+
     if (help === undefined) {
       $("input").attr("disabled", "disabled");
       $("#submit_input").attr("disabled", "disabled");
@@ -945,8 +937,3 @@ $(function() {
   
   setup_tooltip();
 });
-
-
-
-
-
