@@ -12,7 +12,7 @@ var rand;
 
 // helper function to append point p to array a used in charts where points must be sequential, e.g. [[0, y1], [1, y2], [2, y3], ...]
 var append = function(a, p, s) {
-  console.log('append invoked. argument s:',s);
+  // console.log('append invoked. argument s:',s);
   if (a.length === 0) {
     if (s !== undefined) {
       a.push([s, p]);
@@ -26,6 +26,7 @@ var append = function(a, p, s) {
 
 // disables input, only re-enabling it if you have not input a forecast yet
 function update_input_state_ticker() {
+  console.log('update_input_state_ticker invoked!');
   $("input").attr("disabled", "disabled");
   $("#submit_input").attr("disabled", "disabled");
   if (forecasts[r.username] === undefined) {
@@ -247,7 +248,6 @@ function replot() {
     inflation_fanfill.push([tt+nn, pi_tn + pi_stddev, pi_tn - pi_stddev]);
   }
   
-  
   $.plot($("#fanplot"), [
     {
       data: inflation_fan,
@@ -318,9 +318,9 @@ function replot() {
   
   opts.legend.container = "#plot1-legend"; // places the legend outside the plot, in the DOM
   if(r.config.pifcst==0){ 
-    console.log('r.config.pifcst==0')
-    console.log('inflation_forecast_series>>>>',inflation_forecast_series)
-    console.log('inflation_2_series>>>>',inflation_2_series)
+    // console.log('r.config.pifcst==0')
+    // console.log('inflation_forecast_series>>>>',inflation_forecast_series)
+    // console.log('inflation_2_series>>>>',inflation_2_series)
     $.plot($("#plot1"), [
       {
         data: inflation_series,
@@ -340,10 +340,10 @@ function replot() {
     ], opts);
   }
   if(r.config.pifcst==1){ 
-    console.log('r.config.pifcst==1')
-    console.log('inflation_series>>>>',inflation_series)
-    console.log('inflation_forecast_series>>>>',inflation_forecast_series)
-    console.log('inflation_2_series>>>>',inflation_2_series)
+    // console.log('r.config.pifcst==1')
+    // console.log('inflation_series>>>>',inflation_series)
+    // console.log('inflation_forecast_series>>>>',inflation_forecast_series)
+    // console.log('inflation_2_series>>>>',inflation_2_series)
     $.plot($("#plot1"), [
       { 
         data: inflation_fan,
@@ -376,56 +376,6 @@ function replot() {
     ], opts);
     
   } 
-  
-  opts.legend.container = "#plot2-legend";
-  
-
-  if(r.config.xfcst==0){
-    console.log('trying to change plot 2 -- but nothing. r.config.xfcst === 0')
-    // $.plot($("#plot2"), [
-    //   {
-    //     data: output_series,
-    //     color: red,
-    //     label: "Output"
-    //   },
-    //   {
-    //     data: inflation_2_series,
-    //     color: blue,
-    //     label: "Output Forecast"
-    //   }
-    // ], opts);
-  }
-  
-  if(r.config.xfcst==1){
-    console.log('trying to change plot 2 -- but nothing. r.config.xfcst === 1')
-    // $.plot($("#plot2"), [
-    //   { 
-    //     data: output_fan,
-    //     color: green,
-    //     label: "Central Bank's Output Forecast",
-    //     lines: {fillBetween: true}
-    //   },
-      
-    //   {
-    //     data: output_fanfill,
-    //     color: green,
-    //     lines: {show: true, lineWidth: 0, fill: 0.2},
-    //     points: {show: false},
-    //     hoverable: false
-
-    //   },
-    //   {
-    //     data: output_series,
-    //     color: red,
-    //     label: "Output"
-    //   },
-    //   {
-    //     data: inflation_2_series,
-    //     color: blue,
-    //     label: "Output Forecast"
-    //   }
-    // ], opts);
-  }
   
   opts.legend.container = "#plot3-legend";
 
@@ -531,9 +481,13 @@ var forecasts = {};
 // returns true iff all subjects in group have sent in a forecast
 function all_forecasts_in() {
   console.log("all_forecasts_in invoked");
+  console.log('this is forecasts',forecasts);
+  console.log('this is r.groups',r.groups);
   var all_in = true;
-  var subject;
-  for (subject in r.groups) {
+  // var subject;
+  for (let subject in r.groups) {
+    console.log('this is subject',subject);
+
     if (r.groups[subject] === r.group && forecasts[subject] === undefined) {
       all_in = false;
     }
@@ -544,24 +498,27 @@ function all_forecasts_in() {
 // called when a new forecast comes in updates the plots, checks if all forecasts are now in, sending a new shock if subject receiving it is the "coordinator" (see min_group)
 function handle_forecast(msg) {
   console.log("handle_forecast invoked");
+  console.log('this is argument >>>msg:',msg);
   if (msg.Sender === r.username) {
+    console.log('inside this conditional -- msg.Sender === r.username')
     $("input").attr("disabled", "disabled");
     $("#submit_input").attr("disabled", "disabled");
     $(".input-state").text("Please wait for group to finish...");
     $("#inflation_input").val(parseFloat(msg.Value.inflation).toFixed(0));
-    $("#inflationfour_input").val(parseFloat(msg.Value.inflationfour).toFixed(0));
+    // $("#inflationfour_input").val(parseFloat(msg.Value.inflationfour).toFixed(0));
     $("#inflation_2_input").val(parseFloat(msg.Value.output).toFixed(0));
     $("form p").text("Please wait for others to submit their forecasts.");
     append(inflation_forecast_series, msg.Value.inflation, 2);
-    append(inflationfour_forecast_series, msg.Value.inflationfour, 5);
+    // append(inflationfour_forecast_series, msg.Value.inflationfour, 5);
     append(inflation_2_series, msg.Value.output, 3);
     replot();
   }
   
   forecasts[msg.Sender] = msg.Value;
   if (all_forecasts_in()) {
+    console.log('inside all_forecasts_in() conditional!');
     $("#inflation_input").val("");
-    $("#inflationfour_input").val("");
+    // $("#inflationfour_input").val("");
 
     $("#inflation_2_input").val("");
     var subperiod = $(".period").text();
@@ -573,7 +530,7 @@ function handle_forecast(msg) {
     subperiod++;
     $(".period").text(subperiod);
     if (min_group()) {
-      var last_shock = shock_series[shock_series.length -1][1];
+      // var last_shock = shock_series[shock_series.length -1][1];
       var draw = rand_shock();
       r.send("shock", {subperiod: subperiod, draw: draw, shock: shockarray[subperiod-1]});
       r.send("progress", {period: r.period, subperiod: subperiod}, {period: 0, group: 0});
@@ -599,22 +556,22 @@ function handle_shock(msg) {
   
   if (all_forecasts_in()) {
     var inflation_forecasts = [];
-    var inflationfour_forecasts = [];
+    // var inflationfour_forecasts = [];
     var output_forecasts = [];
     for (var subject in forecasts) {
       if (forecasts[subject].inflation !== null && forecasts[subject].output !== null) {
         inflation_forecasts.push(forecasts[subject].inflation);
-        inflationfour_forecasts.push(forecasts[subject].inflationfour);
+        // inflationfour_forecasts.push(forecasts[subject].inflationfour);
         output_forecasts.push(forecasts[subject].output);
       }
     }
     var e_i = median(inflation_forecasts); 
-    var e_i_four = median(inflationfour_forecasts);
+    // var e_i_four = median(inflationfour_forecasts);
     var e_o = median(output_forecasts);
     
-    var last_e_i = e_i_series[e_i_series.length - 1][1];
-    var last_e_o = e_o_series[e_o_series.length - 1][1];
-    var last_interest_rate = interest_rate_series[interest_rate_series.length - 1][1];
+    // var last_e_i = e_i_series[e_i_series.length - 1][1];
+    // var last_e_o = e_o_series[e_o_series.length - 1][1];
+    // var last_interest_rate = interest_rate_series[interest_rate_series.length - 1][1];
     var last_inflation = inflation_series[inflation_series.length - 1][1];
     var last_output = output_series[output_series.length - 1][1];
     
@@ -642,7 +599,6 @@ function handle_shock(msg) {
     append(inflation_series, inflation);
     append(output_series, output);
     append(pistar_WR_series, pistar_WR); 
-
     
     if (r.username in old_forecasts) {
       if (old_forecasts[r.username].inflation === null || old_forecasts[r.username].output === null) {
@@ -713,11 +669,14 @@ function handle_shock(msg) {
   replot();
   
   if (subperiod <= r.config.subperiods) {
+    console.log('subperiod>>>',subperiod);
+    console.log('r.config.subperiods>>>',r.config.subperiods);
     update_input_state_ticker();
     if (ROBOTS && !r.__sync__.in_progress) {
+      console.log('inside this weird spot');
       robot = setTimeout(function() {
         var inflation = rand.uniform(40, -50); 
-        var inflationfour = rand.uniform(40,-50);
+        // var inflationfour = rand.uniform(40,-50);
         var output = rand.uniform(40, -50); 
         r.send("forecast", { subperiod: subperiod, inflation: inflation, output: output });
         r.send("progress", { period: r.period, subperiod: subperiod, forecast: true}, {period: 0, group: 0});
@@ -747,22 +706,10 @@ function finish_sync() {
       $("#inflation_input").closest(".control-group").addClass("error");
       help = $("<span>").
         addClass("help-inline").
-        text("Please input your inflation estimate");
+        text("Please input your inflation @ t+1 estimate");
       $("#inflation_input").after(help);
     } else {
       $("#inflation_input").closest(".control-group").removeClass("error");
-    }
-
-    var inflationfour = $("#inflationfour_input").val();
-    $(".help-inline").remove();
-    if (inflationfour === "") {
-      $("#inflationfour_input").closest(".control-group").addClass("error");
-      help = $("<span>").
-        addClass("help-inline").
-        text("Please input your 4-step ahead inflation estimate");
-      $("#inflationfour_input").after(help);
-    } else {
-      $("#inflationfour_input").closest(".control-group").removeClass("error");
     }
 
     var output = $("#inflation_2_input").val();
@@ -770,17 +717,18 @@ function finish_sync() {
       $("#inflation_2_input").closest(".control-group").addClass("error");
       help = $("<span>").
         addClass("help-inline").
-        text("Please input your output estimate");
+        text("Please input your inflation @ t+2 estimate");
       $("#inflation_2_input").after(help);
     } else {
       $("#inflation_2_input").closest(".control-group").removeClass("error");
     }
 
     if (help === undefined) {
+      console.log('help is undefined. so inputs are disabled');
       $("input").attr("disabled", "disabled");
       $("#submit_input").attr("disabled", "disabled");
       var subperiod = parseInt($(".period").text(), 10);
-      r.send("forecast", { subperiod: subperiod, inflation: inflation, inflationfour: inflationfour, output: output });
+      r.send("forecast", { subperiod: subperiod, inflation: inflation, output: output });
       r.send("progress", {period: r.period, subperiod: subperiod, forecast: true}, {period: 0, group: 0});
     }
     return false;
@@ -859,11 +807,14 @@ function finish_sync() {
   }, 500);
   var period = parseInt($(".period").text(), 10);
   if (period <= r.config.subperiods) {
+    console.log('this is period>>>',period);
+    console.log('this is r.config.subperiods>>>',r.config.subperiods);
+    console.log('period is less than r.config.subperiods')
     if (ROBOTS && typeof robots === "undefined") {
       robot = setTimeout(function() {
         var inflation = last_inflation;
         var output = last_output;
-        r.send("forecast", { inflation: inflation, inflationfour: inflationfour, output: output });
+        r.send("forecast", { inflation: inflation, output: output });
         var subperiod = parseInt($(".period").text(), 10);
         r.send("progress", {period: r.period, subperiod: subperiod, forecast: true}, {period: 0, group: 0});
       }, Math.round(1000 + Math.random() * 10000));
