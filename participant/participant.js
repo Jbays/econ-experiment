@@ -165,7 +165,75 @@ var nextpistar_WR_series = [[-1, 0], [0, 0], [1,0]];
 //Old output gap Change
 var old_x_change_series = [[-2, 0], [-1, 0], [0, 0]];
 
+// function plot(){
+//   console.log("plot invoked!");
+//   var opts = {
+//     series: {
+//       lines: { show: true },
+//       points: { show: true }
+//     },
+//     grid: {
+//       hoverable: true,
+//       clickable: false
+//     },
+//     xaxis: {
+//       min: -4,
+//       max: Math.max(40, inflation_series.length),
+//       minTickSize: 1,
+//       tickDecimals: 0,
+//       tickFormatter: function(tick) {
+//         return Math.round(tick);
+//       }
+//     },
+//     legend: {
+//       backgroundOpacity: 0,
+//       container: ""
+//     }
+//   };
+//   var red = "#cc0000";
+//   var blue = "#3465a4";
+//   var green = "#00ff00";
+//   var orange = "#FFA500";
+
+//   var interest_fan = [];
+//   var interest_fanfill = [];
+//   for (var i in interest_rate_series) {
+//     if (interest_rate_series[i][0] >= 0) {
+//       interest_fan.push(interest_rate_series[i]);
+//     }
+//   }
+//   var t = shock_series[shock_series.length-1][0];
+//   var r_t = shock_series[shock_series.length-1] [1];
+//   console.log('r.config',r.config);
+//   // console.log('r.config.forecast_length',r.config.forecast_length);
+//   // for (var n = 1; n <= r.config.forecast_length; n++) {
+//   //   var r_tn = r.config.dide *Math.pow(r.config.p, n-1) * r_t;
+//   //   interest_fan.push([t+n, r_tn]);
+//   //   var stddev = r.config.shock_stddev * Math.sqrt(n);
+//   //   interest_fanfill.push([t+n, r_tn + stddev, r_tn - stddev]);
+//   // }
+
+//   $.plot($("#fanplot"), [
+//     {
+//       data: interest_fan,
+//       color: red,
+//       label: "Interest Rate Forecast",
+//       lines: {fillBetween: true}
+//     },
+//     {
+//       data: interest_fanfill,
+//       color: red,
+//       lines: {show: true, lineWidth: 0, fill: 0.2},
+//       points: {show: false},
+//       hoverable: false
+//     }
+//   ], opts);
+  
+//   // the inflation fan plot
+// }
+
 // Updates the plots when series data changes Automatically sets axis min/max to display all data
+
 function replot() {
   console.log("replot invoked")
   var opts = {
@@ -186,6 +254,10 @@ function replot() {
         return Math.round(tick);
       }
     },
+    yaxis:{
+      min:-250,
+      max:250
+    },
     legend: {
       backgroundOpacity: 0,
       container: ""
@@ -195,7 +267,6 @@ function replot() {
   var blue = "#3465a4";
   var green = "#00ff00";
   var orange = "#FFA500";
-
   
   // the interest fan plot, yes, this is recomputed every time we replot
   var interest_fan = [];
@@ -231,7 +302,6 @@ function replot() {
   ], opts);
   
   // the inflation fan plot
-  
   var inflation_fan = [];
   var inflation_fanfill = [];
   for (var ii in inflation_series) {
@@ -263,7 +333,6 @@ function replot() {
       hoverable: false
     }
   ], opts);
-  
   
   //The output fan plot
   var output_fan = [];
@@ -420,7 +489,6 @@ function replot() {
     ], opts);
     opts.legend.container = null;
   }
-
 }
 
 // show the current tab, hide all others
@@ -481,12 +549,9 @@ var forecasts = {};
 // returns true iff all subjects in group have sent in a forecast
 function all_forecasts_in() {
   console.log("all_forecasts_in invoked");
-  console.log('this is forecasts',forecasts);
-  console.log('this is r.groups',r.groups);
   var all_in = true;
   // var subject;
   for (let subject in r.groups) {
-    console.log('this is subject',subject);
 
     if (r.groups[subject] === r.group && forecasts[subject] === undefined) {
       all_in = false;

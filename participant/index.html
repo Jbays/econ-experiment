@@ -2,14 +2,14 @@
 <html>
   <head>
     <title>Enter Forecast</title>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/redwood.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.min.js"></script>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"/>
+    <script type="text/javascript" src="{{ STATIC_URL }}flot/jquery.flot.min.js"></script>
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap.min.css"></link>
     <script type="text/javascript">
       {{ js }}
-    	</script>
-		<style type="text/css">
+    </script>
+  	<style type="text/css">
 			{{ css }}
 		</style>
 	</head>
@@ -20,102 +20,117 @@
           <li>Subject: <span class="subject"></span></li>
           <li>Period: <span class="period">1</span></li>
           <li class="time_remaining">Time Remaining:</li>
-          <li>Total Points: <span class="total_points"></span></li>
+          <li>Total Points: 
+            <span class="total_points"></span>
+          </li>
+          <br>
+          <br>
+          <br>
+          <br>
+          <br>      
         </ul>
       </div>
-      <ul class="nav nav-pills nav-stacked"></ul>
-      <h4 class="table-header">Next Period</h4>
-      <div class="row">
-        <form class="span2 well form-horizontal">
-          <p class="prompt"></p>
-          <fieldset>
-            <div class="control-group prompt">
-              <label class="control-label">Inflation @ t+1:</label>
-              <div class="controls">
-                <input id="inflation_input" type="number" min="0" disabled="disabled" />
-              </div>
+    <ul class="nav nav-pills nav-stacked">
+    </ul>
+    <br><br>
+    <br><br>
+    <br><br>
+    <br><br>
+    <br><br>
+    <br><br>
+    <br><br>
+    <h4 class="table-header">Next Period</h4>
+    <br><br>
+    <div class="row">
+      <form class="span2 well form-horizontal">
+        <p class="prompt"></p>
+        <fieldset>
+          <div class="control-group prompt">
+            <label class="control-label"><span style="font-size:40px;">Π</span>t+1</label>
+            <div class="controls">
+              <input id="inflation_input" type="number" min="0" disabled="disabled" />
             </div>
-             
-            <div class="control-group">
-              <label class="control-label prompt">Inflation @ t+2:</label>
-              <div class="controls">
-                <input id="inflation_2_input" type="number" min="0" disabled="disabled" />
-              </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label prompt"><span style="font-size:40px;">Π</span>t+2</label>
+            <div class="controls">
+              <input id="inflation_2_input" type="number" min="0" disabled="disabled" />
             </div>
-            <div class="span4 pull-right">
-              <button id="submit_input" class="btn" disabled="disabled">Submit</button>
-            </div>
-          </fieldset>
-        </form>
-        <div class="wait hide">
-          <p class="span2 well">
-            Please wait.
-          </p>
-        </div>
-        <div class="tab forecast">
-          <div id="plot3" class="plot pull-left"></div>
-          <div id="plot3-legend" class="pull-left"></div>
-          <div id="plot1" class="plot pull-left"></div>
-          <div id="plot1-legend" class="pull-left"></div>
-          <!-- <div id="plot2" class="plot pull-left"></div>
-          <div id="plot2-legend" class="pull-left"></div> -->
-        </div>
-        <div class="tab history" style="visibility: hidden;">
-          <table>
-            <tr class="curr">
-              <td class="table-header current" colspan="3">Current Period</td>
-            </tr>
-            <tr class="curr">
-              <td>Interest Rate:</td>
-              <td class="curr_interest_rate pull-left">300</td>
-            </tr>
-            <tr class="curr">
-              <td>Shock:</td>
-              <td class="curr_shock_size pull-left">0</td>
-            </tr>
-            <tr class="curr">
-              <td>Shock Forecast:</td>
-              <td class="expected_shock_size pull-left">0</td>
-            </tr>
-            <tr class="previous">
-              <td class="table-header" colspan="3">Previous Period</td>
-            </tr>
-            <tr class="previous">
-              <td>Inflation:</td>
-              <td class="last_inflation pull-right">0</td>
-              <td>Forecast:</td>
-              <td class="last_inflation_forecast pull-right">?</td>
-              <td>Error:</td>
-              <td class="last_inflation_forecast_error pull-right">?</td>
-            </tr>
-            <tr class="previous">
-              <td>Output:</td>
-              <td class="last_output pull-right">0</td>
-              <td>Forecast:</td>
-              <td class="last_output_forecast pull-right">?</td>
-              <td>Error:</td>
-              <td class="last_output_forecast_error pull-right">?</td>
-            </tr>
-          </table>
-          <div class="tab forecast" style="visibility: hidden;">
-          <div id="plot3" class="plot pull-left"></div>
-          <div id="plot3-legend" class="pull-left"></div>
-          <div id="plot1" class="plot pull-left"></div>
-          <div id="plot1-legend" class="pull-left"></div>
-          <div id="plot2" class="plot pull-left"></div>
-          <div id="plot2-legend" class="pull-left"></div>
-          <div id="fanplot" class="plot"></div>
-        </div>
-        <div class="tab instructions" style="visibility: hidden;">
-          <object id="pdf_content"
-            width="900" height="600"
-            type="application/pdf"
-            data="">
-            <p>Cannot display PDF</p>
-          </object>
-        </div>
-        <footer class="footer"></footer>
+          </div>
+          <div class="span4 pull-right">
+            <button id="submit_input" class="btn" disabled="disabled">Submit</button>
+          </div>
+        </fieldset>
+      </form>
+      <div class="wait hide">
+        <p class="span2 well">
+          Please wait.
+        </p>
       </div>
+      <div class="tab forecast">
+        <div id="plot3" class="plot pull-left"></div>
+        <div id="plot3-legend" class="pull-left"></div>
+        <div id="plot1" class="plot pull-left"></div>
+        <div id="plot1-legend" class="pull-left"></div>
+        <!-- <div id="plot2" class="plot pull-left"></div>
+          <div id="plot2-legend" class="pull-left"></div> -->
+      </div>
+      <div class="tab history" style="visibility: hidden;">
+        <table>
+          <tr class="curr">
+            <td class="table-header current" colspan="3">Current Period</td>
+          </tr>
+          <tr class="curr">
+            <td>Interest Rate:</td>
+            <td class="curr_interest_rate pull-left">300</td>
+          </tr>
+          <tr class="curr">
+            <td>Shock:</td>
+            <td class="curr_shock_size pull-left">0</td>
+          </tr>
+          <tr class="curr">
+            <td>Shock Forecast:</td>
+            <td class="expected_shock_size pull-left">0</td>
+          </tr>
+          <tr class="previous">
+            <td class="table-header" colspan="3">Previous Period</td>
+          </tr>
+          <tr class="previous">
+            <td>Inflation:</td>
+            <td class="last_inflation pull-right">0</td>
+            <td>Forecast:</td>
+            <td class="last_inflation_forecast pull-right">?</td>
+            <td>Error:</td>
+            <td class="last_inflation_forecast_error pull-right">?</td>
+          </tr>
+          <tr class="previous">
+            <td>Output:</td>
+            <td class="last_output pull-right">0</td>
+            <td>Forecast:</td>
+            <td class="last_output_forecast pull-right">?</td>
+            <td>Error:</td>
+            <td class="last_output_forecast_error pull-right">?</td>
+          </tr>
+        </table>
+        <div class="tab forecast" style="visibility: hidden;">
+        <div id="plot3" class="plot pull-left"></div>
+        <div id="plot3-legend" class="pull-left"></div>
+        <div id="plot1" class="plot pull-left"></div>
+        <div id="plot1-legend" class="pull-left"></div>
+        <div id="plot2" class="plot pull-left"></div>
+        <div id="plot2-legend" class="pull-left"></div>
+        <div id="fanplot" class="plot"></div>
+      </div>
+      <div class="tab instructions" style="visibility: hidden;">
+        <object id="pdf_content"
+          width="900" height="600"
+          type="application/pdf"
+          data="">
+          <p>Cannot display PDF</p>
+        </object>
+      </div>
+      <footer class="footer">
+      </footer>
     </div>
 	</body>
 </html>
