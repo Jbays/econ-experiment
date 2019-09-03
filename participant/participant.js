@@ -26,7 +26,6 @@ var append = function(a, p, s) {
 
 // disables input, only re-enabling it if you have not input a forecast yet
 function update_input_state_ticker() {
-  console.log('update_input_state_ticker invoked!');
   $("input").attr("disabled", "disabled");
   $("#submit_input").attr("disabled", "disabled");
   if (forecasts[r.username] === undefined) {
@@ -62,7 +61,14 @@ function median(array) {
 
 // normal distribution, mean=0, variance=r.config.shock_stddev
 function rand_shock() {
-  return rand.normal(0, r.config.shock_stddev);
+  console.log('you fell in rand_shock!');
+  if ( typeof r === 'undefined' ){
+    console.log('you fell in r is undefined!');
+    return rand.normal(0,93);
+  } else {
+    console.log('you fell in r is very defined!');
+    return rand.normal(0,r.config.shock_stddev);
+  }
 }
 
 // return true iff you have the minimum username of your group.  useful so that only one person (the minimum) in a group send a message for the.  whole group, acting as a sort of coordinator
@@ -138,14 +144,12 @@ var inflation_forecast_series = [];
 // Personal 4-step ahead inflation forecast
 var inflationfour_forecast_series = [];
 
-
 // Actual (realized) output
 var output_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0, 0]];
 // Personal (our) output forecast
 var inflation_2_series = [];
 // Interest rate and shock
 var interest_rate_series = [[-4, 0], [-3,0], [-2, 0], [-1, 0], [0, 0]];
-
 
 var shockarray;
 
@@ -165,75 +169,7 @@ var nextpistar_WR_series = [[-1, 0], [0, 0], [1,0]];
 //Old output gap Change
 var old_x_change_series = [[-2, 0], [-1, 0], [0, 0]];
 
-// function plot(){
-//   console.log("plot invoked!");
-//   var opts = {
-//     series: {
-//       lines: { show: true },
-//       points: { show: true }
-//     },
-//     grid: {
-//       hoverable: true,
-//       clickable: false
-//     },
-//     xaxis: {
-//       min: -4,
-//       max: Math.max(40, inflation_series.length),
-//       minTickSize: 1,
-//       tickDecimals: 0,
-//       tickFormatter: function(tick) {
-//         return Math.round(tick);
-//       }
-//     },
-//     legend: {
-//       backgroundOpacity: 0,
-//       container: ""
-//     }
-//   };
-//   var red = "#cc0000";
-//   var blue = "#3465a4";
-//   var green = "#00ff00";
-//   var orange = "#FFA500";
-
-//   var interest_fan = [];
-//   var interest_fanfill = [];
-//   for (var i in interest_rate_series) {
-//     if (interest_rate_series[i][0] >= 0) {
-//       interest_fan.push(interest_rate_series[i]);
-//     }
-//   }
-//   var t = shock_series[shock_series.length-1][0];
-//   var r_t = shock_series[shock_series.length-1] [1];
-//   console.log('r.config',r.config);
-//   // console.log('r.config.forecast_length',r.config.forecast_length);
-//   // for (var n = 1; n <= r.config.forecast_length; n++) {
-//   //   var r_tn = r.config.dide *Math.pow(r.config.p, n-1) * r_t;
-//   //   interest_fan.push([t+n, r_tn]);
-//   //   var stddev = r.config.shock_stddev * Math.sqrt(n);
-//   //   interest_fanfill.push([t+n, r_tn + stddev, r_tn - stddev]);
-//   // }
-
-//   $.plot($("#fanplot"), [
-//     {
-//       data: interest_fan,
-//       color: red,
-//       label: "Interest Rate Forecast",
-//       lines: {fillBetween: true}
-//     },
-//     {
-//       data: interest_fanfill,
-//       color: red,
-//       lines: {show: true, lineWidth: 0, fill: 0.2},
-//       points: {show: false},
-//       hoverable: false
-//     }
-//   ], opts);
-  
-//   // the inflation fan plot
-// }
-
 // Updates the plots when series data changes Automatically sets axis min/max to display all data
-
 function replot() {
   console.log("replot invoked")
   var opts = {
@@ -255,8 +191,8 @@ function replot() {
       }
     },
     yaxis:{
-      min:-250,
-      max:250
+      min:-700,
+      max:700
     },
     legend: {
       backgroundOpacity: 0,
@@ -596,7 +532,9 @@ function handle_forecast(msg) {
     $(".period").text(subperiod);
     if (min_group()) {
       // var last_shock = shock_series[shock_series.length -1][1];
+      console.log('about to have an error!');
       var draw = rand_shock();
+      console.log('this is draw',draw);
       r.send("shock", {subperiod: subperiod, draw: draw, shock: shockarray[subperiod-1]});
       r.send("progress", {period: r.period, subperiod: subperiod}, {period: 0, group: 0});
     } else {
@@ -734,8 +672,6 @@ function handle_shock(msg) {
   replot();
   
   if (subperiod <= r.config.subperiods) {
-    console.log('subperiod>>>',subperiod);
-    console.log('r.config.subperiods>>>',r.config.subperiods);
     update_input_state_ticker();
     if (ROBOTS && !r.__sync__.in_progress) {
       console.log('inside this weird spot');
@@ -789,7 +725,6 @@ function finish_sync() {
     }
 
     if (help === undefined) {
-      console.log('help is undefined. so inputs are disabled');
       $("input").attr("disabled", "disabled");
       $("#submit_input").attr("disabled", "disabled");
       var subperiod = parseInt($(".period").text(), 10);
@@ -824,6 +759,13 @@ function finish_sync() {
   // no last shock? send the initial shock for the period! 
   if (last_shock === undefined) {
     if (min_group()) {
+      
+      if ( typeof draw === 'undefined' ) {
+        draw = rand_shock();
+      }
+
+      console.log('r>>>',r);
+
       r.send("shock", {draw: draw, shock: r.config.firstshock});
       r.send("progress", {period: r.period, subperiod: 0}, {period: 0, group: 0});
     }
@@ -858,7 +800,7 @@ function finish_sync() {
       $(".time_remaining").text("Time Remaining: 0");
       $(".time_remaining,.prompt").toggleClass("red");
       if (r.config.block === false && secondsLeft <= -5) {
-      r.send("forecast", { inflation: NaN, inflationfour: NaN, output: NaN });
+      r.send("forecast", { inflation: NaN, output: NaN });
         var subperiod = parseInt($(".period").text(), 10);
         r.send("progress", {period: r.period, subperiod: subperiod, forecast: true}, {period: 0, group: 0});
       }
@@ -872,9 +814,6 @@ function finish_sync() {
   }, 500);
   var period = parseInt($(".period").text(), 10);
   if (period <= r.config.subperiods) {
-    console.log('this is period>>>',period);
-    console.log('this is r.config.subperiods>>>',r.config.subperiods);
-    console.log('period is less than r.config.subperiods')
     if (ROBOTS && typeof robots === "undefined") {
       robot = setTimeout(function() {
         var inflation = last_inflation;
