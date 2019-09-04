@@ -135,7 +135,8 @@ function showTooltip(x, y, contents) {
 }
 
 //expected error series
-let expected_error_series = [];
+let expected_error_series_t1 = [];
+let expected_error_series_t2 = [];
 
 // Expected inflation
 var e_i_series = [[0, 0]];
@@ -496,12 +497,14 @@ function handle_forecast(msg) {
     $(".input-state").text("Please wait for group to finish...");
     $("#inflation_input").val(parseFloat(msg.Value.inflation).toFixed(0));
     $("#inflation_2_input").val(parseFloat(msg.Value.output).toFixed(0));
-    $("#expected_error_input").val(parseFloat(msg.Value.expectedError).toFixed(0));
+    $("#expected_error_input_t1").val(parseFloat(msg.Value.expectedErrorT1).toFixed(0));
+    $("#expected_error_input_t2").val(parseFloat(msg.Value.expectedErrorT2).toFixed(0));
     $("form p").text("Please wait for others to submit their forecasts.");
     append(inflation_forecast_series, msg.Value.inflation, 2);
     append(inflation_2_series, msg.Value.output, 3);
     //here is where the expected_error is appended to the expected_error_series array.
-    append(expected_error_series, msg.Value.expectedError);
+    append(expected_error_series_t1, msg.Value.expectedErrorT1);
+    append(expected_error_series_t2, msg.Value.expectedErrorT2);
     replot();
   }
   
@@ -510,7 +513,8 @@ function handle_forecast(msg) {
     console.log('inside all_forecasts_in() conditional!');
     $("#inflation_input").val("");
     $("#inflation_2_input").val("");
-    $("#expected_error_input").val("");
+    $("#expected_error_input_t1").val("");
+    $("#expected_error_input_t2").val("");
     var subperiod = $(".period").text();
     if (subperiod === "") {
       subperiod = 0;
@@ -564,9 +568,10 @@ function handle_shock(msg) {
 
     var testershock = shockarray[subperiod-2];
 
-    var inflation = (r.config.D*e_o) + (r.config.E*e_i) + (r.config.F*testershock);
-    var output = (r.config.A*e_o) + (r.config.B*e_i) + (r.config.C*testershock);
-    var interest_rate =  (r.config.G*e_o) + (r.config.H*e_i) + (r.config.I*testershock);
+    //NOTE: RHOLES: these are the new equations for inflation, output, interest_rate
+    var inflation = (r.config.rholes_beta+r.config.rholes_kappa*r.config.rholes_gamma_one*r.config.rholes_gamma_two)*e_i - r.config.rholes_gamma_one*r.config.rholes_beta*e_o + r.config.rholes_kappa*r.config.rholes_gamma_one*(r.config.rholes_sigma**-1)*testershock;
+    var output = (r.config.rholes_gamma_one*r.config.rholes_gamma_two*e_i) - (r.config.rholes_gamma_one*(r.config.rholes_kappa**-1)*e_o)
+    var interest_rate =  (r.config.rholes_phipi*inflation) + (r.config.rholes_phix*output);
 
     var nextpistar_WR = ((pistar_WR - inflation)/r.config.beta)  -  (r.config.lambda/(r.config.kappa*r.config.beta))*(output-last_output) - (r.config.lambda*r.config.sigma/r.config.beta)*output;
 
@@ -703,24 +708,33 @@ function finish_sync() {
       $("#inflation_2_input").closest(".control-group").removeClass("error");
     }
 
-    let expectedError = $("#expected_error_input").val();
-    if ( expectedError === '' ) {
-      $('#expected_error_input').closest('.control-group').add('error');
+    let expectedErrorT1 = $("#expected_error_input_t1").val();
+    if ( expectedErrorT1 === '' ) {
+      $('#expected_error_input_t1').closest('.control-group').add('error');
       help = $('<span>').
         addClass('help-inline').
         text('Please input your expected error estimate');
-      $('#expected_error_input').after(help);
+      $('#expected_error_input_t1').after(help);
     } else {
-      $("#expected_error_input").closest(".control-group").removeClass("error");
+      $("#expected_error_input_t1").closest(".control-group").removeClass("error");
+    }
+
+    let expectedErrorT2 = $("#expected_error_input_t2").val();
+    if ( expectedErrorT2 === '' ) {
+      $('#expected_error_input_t2').closest('.control-group').add('error');
+      help = $('<span>').
+        addClass('help-inline').
+        text('Please input your expected error estimate');
+      $('#expected_error_input_t2').after(help);
+    } else {
+      $("#expected_error_input_t2").closest(".control-group").removeClass("error");
     }
 
     if (help === undefined) {
       $("input").attr("disabled", "disabled");
       $("#submit_input").attr("disabled", "disabled");
       var subperiod = parseInt($(".period").text(), 10);
-      console.log('hello from help equals undefined');
-      console.log('expected_error_series>>>>',expected_error_series);
-      r.send("forecast", { subperiod: subperiod, inflation: inflation, output: output, expectedError:expectedError });
+      r.send("forecast", { subperiod: subperiod, inflation: inflation, output: output, expectedErrorT1:expectedErrorT1,expectedErrorT2:expectedErrorT2 });
       r.send("progress", {period: r.period, subperiod: subperiod, forecast: true}, {period: 0, group: 0});
     }
     return false;

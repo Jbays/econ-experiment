@@ -51,18 +51,36 @@
               <input id="inflation_input" type="number" min="0" disabled="disabled" />
             </div>
           </div>
+          
+          <div class="control-group">
+            <label class="control-label">Error for:
+              <br/> 
+              <label class="control-label"><span style="font-size:40px;">Π</span>t+1</label>
+            </label>
+            <div class="controls">
+              <br/> 
+              <input id="expected_error_input_t1" type="number" min="0" disabled="disabled" />
+            </div>
+          </div>
+
           <div class="control-group">
             <label class="control-label prompt"><span style="font-size:40px;">Π</span>t+2</label>
             <div class="controls">
               <input id="inflation_2_input" type="number" min="0" disabled="disabled" />
             </div>
           </div>
+
           <div class="control-group">
-              <label class="control-label prompt">What is your expected error?</label>
+              <label class="control-label">Error for:
+                <br/> 
+                <label class="control-label"><span style="font-size:40px;">Π</span>t+2</label>
+              </label>
               <div class="controls">
-                <input id="expected_error_input" type="number" min="0" disabled="disabled" />
+                <br/> 
+                <input id="expected_error_input_t2" type="number" min="0" disabled="disabled" />
               </div>
             </div>
+
           <div class="span4 pull-right">
             <button id="submit_input" class="btn" disabled="disabled">Submit</button>
           </div>
