@@ -194,10 +194,6 @@ function replot() {
         return Math.round(tick);
       }
     },
-    yaxis:{
-      min:-700,
-      max:700
-    },
     legend: {
       backgroundOpacity: 0,
       container: ""
@@ -327,9 +323,6 @@ function replot() {
   
   opts.legend.container = "#plot1-legend"; // places the legend outside the plot, in the DOM
   if(r.config.pifcst==0){ 
-    // console.log('r.config.pifcst==0')
-    // console.log('inflation_forecast_series>>>>',inflation_forecast_series)
-    // console.log('inflation_2_series>>>>',inflation_2_series)
     $.plot($("#plot1"), [
       {
         data: inflation_series,
@@ -341,18 +334,9 @@ function replot() {
         color: blue,
         label: "Inflation Forecast"
       },
-      // {
-      //   data: inflation_2_series,
-      //   color: orange,
-      //   label: "plot one legend thing"
-      // }
     ], opts);
   }
   if(r.config.pifcst==1){ 
-    // console.log('r.config.pifcst==1')
-    // console.log('inflation_series>>>>',inflation_series)
-    // console.log('inflation_forecast_series>>>>',inflation_forecast_series)
-    // console.log('inflation_2_series>>>>',inflation_2_series)
     $.plot($("#plot1"), [
       { 
         data: inflation_fan,
@@ -507,7 +491,6 @@ function handle_forecast(msg) {
   console.log("handle_forecast invoked");
   console.log('this is argument >>>msg:',msg);
   if (msg.Sender === r.username) {
-    console.log('inside this conditional -- msg.Sender === r.username')
     $("input").attr("disabled", "disabled");
     $("#submit_input").attr("disabled", "disabled");
     $(".input-state").text("Please wait for group to finish...");
@@ -537,7 +520,6 @@ function handle_forecast(msg) {
     subperiod++;
     $(".period").text(subperiod);
     if (min_group()) {
-      // var last_shock = shock_series[shock_series.length -1][1];
       var draw = rand_shock();
       r.send("shock", {subperiod: subperiod, draw: draw, shock: shockarray[subperiod-1]});
       r.send("progress", {period: r.period, subperiod: subperiod}, {period: 0, group: 0});
@@ -563,22 +545,16 @@ function handle_shock(msg) {
   
   if (all_forecasts_in()) {
     var inflation_forecasts = [];
-    // var inflationfour_forecasts = [];
     var output_forecasts = [];
     for (var subject in forecasts) {
       if (forecasts[subject].inflation !== null && forecasts[subject].output !== null) {
         inflation_forecasts.push(forecasts[subject].inflation);
-        // inflationfour_forecasts.push(forecasts[subject].inflationfour);
         output_forecasts.push(forecasts[subject].output);
       }
     }
     var e_i = median(inflation_forecasts); 
-    // var e_i_four = median(inflationfour_forecasts);
     var e_o = median(output_forecasts);
     
-    // var last_e_i = e_i_series[e_i_series.length - 1][1];
-    // var last_e_o = e_o_series[e_o_series.length - 1][1];
-    // var last_interest_rate = interest_rate_series[interest_rate_series.length - 1][1];
     var last_inflation = inflation_series[inflation_series.length - 1][1];
     var last_output = output_series[output_series.length - 1][1];
     
@@ -681,7 +657,6 @@ function handle_shock(msg) {
       console.log('inside this weird spot');
       robot = setTimeout(function() {
         var inflation = rand.uniform(40, -50); 
-        // var inflationfour = rand.uniform(40,-50);
         var output = rand.uniform(40, -50); 
         r.send("forecast", { subperiod: subperiod, inflation: inflation, output: output });
         r.send("progress", { period: r.period, subperiod: subperiod, forecast: true}, {period: 0, group: 0});
