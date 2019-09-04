@@ -61,14 +61,15 @@ function median(array) {
 
 // normal distribution, mean=0, variance=r.config.shock_stddev
 function rand_shock() {
-  console.log('you fell in rand_shock!');
-  if ( typeof r === 'undefined' ){
-    console.log('you fell in r is undefined!');
-    return rand.normal(0,93);
-  } else {
-    console.log('you fell in r is very defined!');
+  //NOTE: hack to get rand_shock() to work before r is available at runtime
+  // console.log('you fell in rand_shock!');
+  // if ( typeof r === 'undefined' ){
+  //   console.log('you fell in r is undefined!');
+  //   return rand.normal(0,93);
+  // } else {
+  //   console.log('you fell in r is very defined!');
     return rand.normal(0,r.config.shock_stddev);
-  }
+  // }
 }
 
 // return true iff you have the minimum username of your group.  useful so that only one person (the minimum) in a group send a message for the.  whole group, acting as a sort of coordinator
@@ -132,6 +133,9 @@ function showTooltip(x, y, contents) {
     opacity: 0.80
   }).appendTo("body").fadeIn(200);
 }
+
+//expected error series
+let expected_error_series = [];
 
 // Expected inflation
 var e_i_series = [[0, 0]];
@@ -356,6 +360,8 @@ function replot() {
         label: "Central Bank's Inflation Forecast",
         lines: {fillBetween: true}
       },
+      //NOTE: RHOLES: comment out lines 361-367 to disable the green fan
+      //(EVERYTHING BETWEEN AND INCLUDING THE OPENING CURLY/CLOSING CURLY + COMMA)
       {
         data: inflation_fanfill,
         color: green,
@@ -506,12 +512,13 @@ function handle_forecast(msg) {
     $("#submit_input").attr("disabled", "disabled");
     $(".input-state").text("Please wait for group to finish...");
     $("#inflation_input").val(parseFloat(msg.Value.inflation).toFixed(0));
-    // $("#inflationfour_input").val(parseFloat(msg.Value.inflationfour).toFixed(0));
     $("#inflation_2_input").val(parseFloat(msg.Value.output).toFixed(0));
+    $("#expected_error_input").val(parseFloat(msg.Value.expectedError).toFixed(0));
     $("form p").text("Please wait for others to submit their forecasts.");
     append(inflation_forecast_series, msg.Value.inflation, 2);
-    // append(inflationfour_forecast_series, msg.Value.inflationfour, 5);
     append(inflation_2_series, msg.Value.output, 3);
+    //here is where the expected_error is appended to the expected_error_series array.
+    append(expected_error_series, msg.Value.expectedError);
     replot();
   }
   
@@ -519,9 +526,8 @@ function handle_forecast(msg) {
   if (all_forecasts_in()) {
     console.log('inside all_forecasts_in() conditional!');
     $("#inflation_input").val("");
-    // $("#inflationfour_input").val("");
-
     $("#inflation_2_input").val("");
+    $("#expected_error_input").val("");
     var subperiod = $(".period").text();
     if (subperiod === "") {
       subperiod = 0;
@@ -532,9 +538,7 @@ function handle_forecast(msg) {
     $(".period").text(subperiod);
     if (min_group()) {
       // var last_shock = shock_series[shock_series.length -1][1];
-      console.log('about to have an error!');
       var draw = rand_shock();
-      console.log('this is draw',draw);
       r.send("shock", {subperiod: subperiod, draw: draw, shock: shockarray[subperiod-1]});
       r.send("progress", {period: r.period, subperiod: subperiod}, {period: 0, group: 0});
     } else {
@@ -724,11 +728,24 @@ function finish_sync() {
       $("#inflation_2_input").closest(".control-group").removeClass("error");
     }
 
+    let expectedError = $("#expected_error_input").val();
+    if ( expectedError === '' ) {
+      $('#expected_error_input').closest('.control-group').add('error');
+      help = $('<span>').
+        addClass('help-inline').
+        text('Please input your expected error estimate');
+      $('#expected_error_input').after(help);
+    } else {
+      $("#expected_error_input").closest(".control-group").removeClass("error");
+    }
+
     if (help === undefined) {
       $("input").attr("disabled", "disabled");
       $("#submit_input").attr("disabled", "disabled");
       var subperiod = parseInt($(".period").text(), 10);
-      r.send("forecast", { subperiod: subperiod, inflation: inflation, output: output });
+      console.log('hello from help equals undefined');
+      console.log('expected_error_series>>>>',expected_error_series);
+      r.send("forecast", { subperiod: subperiod, inflation: inflation, output: output, expectedError:expectedError });
       r.send("progress", {period: r.period, subperiod: subperiod, forecast: true}, {period: 0, group: 0});
     }
     return false;
@@ -760,11 +777,10 @@ function finish_sync() {
   if (last_shock === undefined) {
     if (min_group()) {
       
-      if ( typeof draw === 'undefined' ) {
-        draw = rand_shock();
-      }
-
-      console.log('r>>>',r);
+      //hack to get draw defined at initial runtime
+      // if ( typeof draw === 'undefined' ) {
+      //   draw = rand_shock();
+      // }
 
       r.send("shock", {draw: draw, shock: r.config.firstshock});
       r.send("progress", {period: r.period, subperiod: 0}, {period: 0, group: 0});
@@ -800,7 +816,7 @@ function finish_sync() {
       $(".time_remaining").text("Time Remaining: 0");
       $(".time_remaining,.prompt").toggleClass("red");
       if (r.config.block === false && secondsLeft <= -5) {
-      r.send("forecast", { inflation: NaN, output: NaN });
+        r.send("forecast", { inflation: NaN, output: NaN });
         var subperiod = parseInt($(".period").text(), 10);
         r.send("progress", {period: r.period, subperiod: subperiod, forecast: true}, {period: 0, group: 0});
       }
