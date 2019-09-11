@@ -250,6 +250,7 @@ function replot() {
       inflation_fan.push(inflation_series[ii]);
     }
   }
+  //here is where the inflation_fanfill is calculated
   var tt = shock_series[shock_series.length-1][0];
   var pi_t = shock_series[shock_series.length-1] [1];
   for (var nn = 1; nn <= r.config.forecast_length; nn++) {
@@ -258,7 +259,16 @@ function replot() {
     var pi_stddev = r.config.shock_stddev * Math.sqrt(nn);
     inflation_fanfill.push([tt+nn, pi_tn + pi_stddev, pi_tn - pi_stddev]);
   }
-  
+
+  //here I'll push in duplicate dots into the fanfill -- I suspect I'll have to drop them in reverse order
+  //this will make the auto-scaling feature for the yaxis work as expected
+  //SHOULD NOT TRUNCATE THE BOTTOM PART OF THE INFLATION FANFILL
+  let extraPointsForFanFill = inflation_fanfill.map((elem)=>{
+    return [elem[0],elem[2],elem[1]];
+  }).reverse();
+
+  inflation_fanfill.push(...extraPointsForFanFill);
+
   $.plot($("#fanplot"), [
     {
       data: inflation_fan,
@@ -349,8 +359,9 @@ function replot() {
         label: "Central Bank's Inflation Forecast",
         lines: {fillBetween: true}
       },
-      //NOTE: RHOLES: comment out lines 361-367 to disable the green fan
+      //NOTE: RHOLES: comment out to disable the green fan
       //(EVERYTHING BETWEEN AND INCLUDING THE OPENING CURLY/CLOSING CURLY + COMMA)
+      //data: inflation_fanfill
       {
         data: inflation_fanfill,
         color: green,
