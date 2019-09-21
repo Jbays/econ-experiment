@@ -12,7 +12,6 @@ var rand;
 
 // helper function to append point p to array a used in charts where points must be sequential, e.g. [[0, y1], [1, y2], [2, y3], ...]
 var append = function(a, p, s) {
-  // console.log('append invoked. argument s:',s);
   if (a.length === 0) {
     if (s !== undefined) {
       a.push([s, p]);
@@ -61,15 +60,13 @@ function median(array) {
 
 // normal distribution, mean=0, variance=r.config.shock_stddev
 function rand_shock() {
+  //21 Sept 2019
   //NOTE: hack to get rand_shock() to work before r is available at runtime
-  // console.log('you fell in rand_shock!');
-  // if ( typeof r === 'undefined' ){
-  //   console.log('you fell in r is undefined!');
-  //   return rand.normal(0,93);
-  // } else {
-  //   console.log('you fell in r is very defined!');
+  if ( typeof r === 'undefined' ){
+    return rand.normal(0,93);
+  } else {
     return rand.normal(0,r.config.shock_stddev);
-  // }
+  }
 }
 
 // return true iff you have the minimum username of your group.  useful so that only one person (the minimum) in a group send a message for the.  whole group, acting as a sort of coordinator
@@ -91,7 +88,6 @@ function min_group() {
 
 // sends a summary message with how long subjects has been on each of the three tabs
 function send_tab_summary() {
-  console.log("send_tab_summary invoked")
   var last_time;
   var tab_times = {
     "forecast": 0,
@@ -121,7 +117,6 @@ function send_tab_summary() {
 
 // displayes the plot tooltip when a point is hovered over
 function showTooltip(x, y, contents) {
-  console.log("showTooltip invoked")
   $('<div id="tooltip">' + contents + '</div>').css({
     position: 'absolute',
     display: 'none',
@@ -180,7 +175,6 @@ var old_x_change_series = [[-2, 0], [-1, 0], [0, 0]];
 
 // Updates the plots when series data changes Automatically sets axis min/max to display all data
 function replot() {
-  console.log("replot invoked")
   var opts = {
     series: {
       lines: { show: true },
@@ -359,9 +353,9 @@ function replot() {
         label: "Central Bank's Inflation Forecast",
         lines: {fillBetween: true}
       },
-      //NOTE: RHOLES: comment out to disable the green fan
+      //NOTE: RHOLES: comment out below to disable the green fan
       //(EVERYTHING BETWEEN AND INCLUDING THE OPENING CURLY/CLOSING CURLY + COMMA)
-      //data: inflation_fanfill
+      //has the key-value pair "data: inflation_fanfill"
       {
         data: inflation_fanfill,
         color: green,
@@ -377,12 +371,12 @@ function replot() {
       {
         data: inflation_1_forecast_series,
         color: blue,
-        label: "Inflation Forecast @ period+1"
+        label: "Inflation Forecast @ period+1 (Π@t+1)"
       },
       {
         data: inflation_2_forecast_series,
         color: orange,
-        label: "Inflation Forecast @ period+2"
+        label: "Inflation Forecast @ period+2 (Π@t+2)"
       },
     ], opts);
   }
@@ -469,7 +463,6 @@ function replot() {
 
 // show the current tab, hide all others
 function update_tab_nav() {
-  console.log("update_tab_nav invoked");
   var tab_id = document.location.hash.substr(1);
   if (tab_id !== "") {
     $(".tab").css("visibility", "hidden");
@@ -491,7 +484,6 @@ function update_tab_nav() {
 }
 
 function setup_tooltip() {
-  console.log("setup_tooltip invoked");
   var previousPoint = null;
   $(".plot").bind("plothover", function(event, pos, item) {
     if (item) {
@@ -524,7 +516,6 @@ var forecasts = {};
 
 // returns true iff all subjects in group have sent in a forecast
 function all_forecasts_in() {
-  console.log("all_forecasts_in invoked");
   var all_in = true;
   for (let subject in r.groups) {
     if (r.groups[subject] === r.group && forecasts[subject] === undefined) {
@@ -536,8 +527,6 @@ function all_forecasts_in() {
 
 // called when a new forecast comes in updates the plots, checks if all forecasts are now in, sending a new shock if subject receiving it is the "coordinator" (see min_group)
 function handle_forecast(msg) {
-  console.log("handle_forecast invoked");
-  console.log('this is msg',msg);
   if (msg.Sender === r.username) {
     $("input").attr("disabled", "disabled");
     $("#submit_input").attr("disabled", "disabled");
@@ -560,7 +549,6 @@ function handle_forecast(msg) {
   
   forecasts[msg.Sender] = msg.Value;
   if (all_forecasts_in()) {
-    console.log('inside all_forecasts_in() conditional!');
     $("#inflation_1_input").val("");
     $("#inflation_2_input").val("");
     $("#expected_error_input_t1").val("");
@@ -586,7 +574,6 @@ function handle_forecast(msg) {
 
 // handles a new shock calculates variables given previous forecasts unlocks inputs for next forecast, unless all subperiods are finished
 function handle_shock(msg) {
-  console.log("handle_shock invoked");
   last_shock = msg;
 
   var curr_shock_size = msg.Value.shock;
@@ -598,7 +585,6 @@ function handle_shock(msg) {
   var subperiod = parseInt($(".period").text(), 10);
   
   if (all_forecasts_in()) {
-    console.log('youre inside handle_shock && all forecasts are in!');
     var inflation_forecasts = [];
     var output_forecasts = [];
     for (var subject in forecasts) {
@@ -625,8 +611,6 @@ function handle_shock(msg) {
     var inflation = (r.config.rholes_beta+r.config.rholes_kappa*r.config.rholes_gamma_one*r.config.rholes_gamma_two)*e_i - r.config.rholes_gamma_one*r.config.rholes_beta*e_o + r.config.rholes_kappa*r.config.rholes_gamma_one*(r.config.rholes_sigma**-1)*testershock;
     var output = (r.config.rholes_gamma_one*r.config.rholes_gamma_two*e_i) - (r.config.rholes_gamma_one*(r.config.rholes_kappa**-1)*e_o)
     var interest_rate =  (r.config.rholes_phipi*inflation) + (r.config.rholes_phix*output);
-
-    console.log('this is output>>>>',output);
 
     // var nextpistar_WR = ((pistar_WR - inflation)/r.config.beta)  -  (r.config.lambda/(r.config.kappa*r.config.beta))*(output-last_output) - (r.config.lambda*r.config.sigma/r.config.beta)*output;
 
@@ -723,7 +707,6 @@ function handle_shock(msg) {
   if (subperiod <= r.config.subperiods) {
     update_input_state_ticker();
     if (ROBOTS && !r.__sync__.in_progress) {
-      console.log('inside this weird spot');
       robot = setTimeout(function() {
         var inflation = rand.uniform(40, -50); 
         var output = rand.uniform(40, -50); 
@@ -742,7 +725,6 @@ function handle_shock(msg) {
 // finish_sync is called on page refresh, when redwood is done loading the queue it initializes variables, inputs, and some display variables
 var last_shock;
 function finish_sync() {
-  console.log("finish_sync invoked");
   $("#pdf_content").attr("data", r.config.instructions_url);
   
   var c = document.location.pathname.split('/');
@@ -831,9 +813,9 @@ function finish_sync() {
     if (min_group()) {
       
       //hack to get draw defined at initial runtime
-      // if ( typeof draw === 'undefined' ) {
-      //   draw = rand_shock();
-      // }
+      if ( typeof draw === 'undefined' ) {
+        draw = rand_shock();
+      }
 
       r.send("shock", {draw: draw, shock: r.config.firstshock});
       r.send("progress", {period: r.period, subperiod: 0}, {period: 0, group: 0});
