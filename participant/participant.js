@@ -63,7 +63,7 @@ function rand_shock() {
   //21 Sept 2019
   //NOTE: hack to get rand_shock() to work before r is available at runtime
   if ( typeof r === 'undefined' ){
-    return rand.normal(0,93);
+    return rand.normal(0,113);
   } else {
     return rand.normal(0,r.config.shock_stddev);
   }
