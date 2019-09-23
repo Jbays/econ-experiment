@@ -62,11 +62,11 @@ function median(array) {
 function rand_shock() {
   //21 Sept 2019
   //NOTE: hack to get rand_shock() to work before r is available at runtime
-  if ( typeof r === 'undefined' ){
-    return rand.normal(0,113);
-  } else {
+  // if ( typeof r === 'undefined' ){
+  //   return rand.normal(0,113);
+  // } else {
     return rand.normal(0,r.config.shock_stddev);
-  }
+  // }
 }
 
 // return true iff you have the minimum username of your group.  useful so that only one person (the minimum) in a group send a message for the.  whole group, acting as a sort of coordinator
@@ -137,8 +137,10 @@ let expected_error_series_t2 = [];
 var e_i_series = [[0, 0]];
 // Expected output
 var e_o_series = [[0, 0]];
-// Actual (realized) inflation
+// Actual (realized) inflation at start point!
 var inflation_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0, 0]];
+
+// var inflation_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0, 0],[1,10],[2,30],[3,-20],[4,-10],[5,40]];
 // Personal (our) inflation forecast
 var inflation_1_forecast_series = [];
 // Personal (our) output forecast
@@ -309,7 +311,10 @@ function replot() {
     if(nx==5){  
       var x_tn = r.config.AX5*shock_t1 +r.config.BX5*x_t1 + r.config.CX5*pi_t1 + r.config.DX5*(shock_t-r.config.p*shock_t1);
     }
-    output_fan.push([tx+nx, x_tn]);
+    // original
+    // output_fan.push([tx+nx, x_tn]);
+    // proposed change.  but first let me investigate why output's are NAN
+    // output.series.push([tx+nx, x_tn]);
     var x_stddev = r.config.shock_stddev * Math.sqrt(nx);
     output_fanfill.push([tx+nx, x_tn + x_stddev, x_tn - x_stddev]);
   }
@@ -401,6 +406,7 @@ function replot() {
   }
 
   if ( r.config.pifcst === 1 ) {
+    
     $.plot($("#plot2"), [
       {
         data: output_series,
@@ -511,7 +517,8 @@ function setup_tooltip() {
   });
 }
 
-var old_forecasts = {};
+let two_previous_forecast = {};
+let one_previous_forecast = {};
 var forecasts = {};
 
 // returns true iff all subjects in group have sent in a forecast
@@ -628,8 +635,10 @@ function handle_shock(msg) {
     append(output_forecast_series, output);
     // append(pistar_WR_series, pistar_WR); 
     
-    if (r.username in old_forecasts) {
-      if (old_forecasts[r.username].inflation === null || old_forecasts[r.username].output === null) {
+    if (r.username in one_previous_forecast) {
+      //I don't think this conditional will ever hit
+      if (one_previous_forecast[r.username].inflation === null || one_previous_forecast[r.username].output === null) {
+        console.log('are you hitting this?');
         r.send("points", 0, {period: 0, group: 0});
         
         $(".last_inflation_forecast").text("N/A");
@@ -639,38 +648,59 @@ function handle_shock(msg) {
         $(".last_output_forecast_error").text("N/A");
         $(".last_score").text("0");
       } else {
-        // use forecast from 2 periods ago, not 1
-        E_inflation = parseInt(old_forecasts[r.username].inflation, 10);
-        //this output variable is actually E_inflation_2
-        E_output = parseInt(old_forecasts[r.username].output, 10);
-        
-        let E_inflation_2_from_three_periods_ago;
+        /**
+         * original untouched
+         * 
+          // use forecast from 2 periods ago, not 1
+          E_inflation = parseInt(one_previous_forecast[r.username].inflation, 10);
+          //this output variable is actually E_inflation_2
+          E_output = parseInt(one_previous_forecast[r.username].output, 10);
 
+          // E_inflation = parseInt(one_previous_forecast[r.username].inflation_1, 10);
+          // E_output = parseInt(one_previous_forecast[r.username].inflation_2, 10);
+        **/
+       
+        let E_inflation_1 = parseInt(one_previous_forecast[r.username].inflation_1, 10);
+        let E_inflation_2;
+       
+        let E_inflation_2_from_three_periods_ago;
+        
+        let score;
+       
         if ( inflation_2_forecast_series.length > 2 ) {
-          E_inflation_2_from_three_periods_ago = inflation_2_forecast_series[inflation_2_forecast_series.length-3]
+          E_inflation_2_from_three_periods_ago = inflation_2_forecast_series[inflation_2_forecast_series.length-3][1];
+          E_inflation_2 = parseInt(E_inflation_2_from_three_periods_ago, 10);
+
+          //score equals the accuracy of their predictions for the inflation at t+1, t+2,
+          score =
+          r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_1 - inflation)) +
+          r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_2 - inflation));
+        } else {
+          //score equals the accuracy of their predictions for the inflation at t+1
+          score = r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_1 - inflation));
         }
         
-        // E_inflationfour = 100;
-
-        var score =
-          r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation - inflation)) +
-          r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_output - output));
-          
+        console.log('inflation>>>',inflation);
+        console.log('E_inflation_1',E_inflation_1);
+        console.log('E_inflation_2',E_inflation_2);
+        console.log('score>>>',score);
+        
         r.set_points(r.points + score);
         r.send("points", score, {period: 0, group: 0, subperiod: subperiod});
         
-        $(".last_inflation_forecast").text(E_inflation.toFixed(0));
+        $(".last_inflation_forecast").text(E_inflation_1.toFixed(0));
         // $(".last_inflationfour_forecast").text(E_inflationfour.toFixed(0));
 
-        $(".last_output_forecast").text(E_output.toFixed(0));
-        $(".last_inflation_forecast_error").text(Math.abs(E_inflation - inflation).toFixed(0));
-        $(".last_output_forecast_error").text(Math.abs(E_output - output).toFixed(0));
+        // $(".last_output_forecast").text(E_output.toFixed(0));
+        $(".last_inflation_forecast_error").text(Math.abs(E_inflation_1 - inflation).toFixed(0));
+        // $(".last_output_forecast_error").text(Math.abs(E_output - output).toFixed(0));
         $(".last_score").text(score.toFixed(2));
       }
     }
     
+    //at some point, forecasts is overwriting one_previous_forecast
     for (subject in forecasts) {
-      old_forecasts[subject] = forecasts[subject];
+      one_previous_forecast[subject] = forecasts[subject];
       forecasts[subject] = undefined;
     }
     $(".last_inflation").text(inflation);
@@ -813,9 +843,9 @@ function finish_sync() {
     if (min_group()) {
       
       //hack to get draw defined at initial runtime
-      if ( typeof draw === 'undefined' ) {
-        draw = rand_shock();
-      }
+      // if ( typeof draw === 'undefined' ) {
+      //   draw = rand_shock();
+      // }
 
       r.send("shock", {draw: draw, shock: r.config.firstshock});
       r.send("progress", {period: r.period, subperiod: 0}, {period: 0, group: 0});
