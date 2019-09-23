@@ -62,11 +62,11 @@ function median(array) {
 function rand_shock() {
   //21 Sept 2019
   //NOTE: hack to get rand_shock() to work before r is available at runtime
-  // if ( typeof r === 'undefined' ){
-  //   return rand.normal(0,113);
-  // } else {
+  if ( typeof r === 'undefined' ){
+    return rand.normal(0,113);
+  } else {
     return rand.normal(0,r.config.shock_stddev);
-  // }
+  }
 }
 
 // return true iff you have the minimum username of your group.  useful so that only one person (the minimum) in a group send a message for the.  whole group, acting as a sort of coordinator
@@ -241,45 +241,64 @@ function replot() {
   // the inflation fan plot
   var inflation_fan = [];
   var inflation_fanfill = [];
+
+  //this is a feature request -- to get the green dots to graph their t+1 prediction (instead of realized inflation @ t+0)
+  let history_of_central_bank_predictions = {};
+
+  // console.log('this is inflation_series.toString()>>>>',inflation_series.toString());
+  // console.log('inflation_fan.toString() blank >>>>',inflation_fan.toString());
+
+  //this loop pushes the last inflation into the green dots array
+  //aka --> pushes red dots into the green dots array
   for (var ii in inflation_series) {
+    //if its the zeroth period or after
     if (inflation_series[ii][0] >= 0) {
+      // console.log('inflation_series[ii]:',inflation_series[ii]);
       inflation_fan.push(inflation_series[ii]);
     }
   }
+
+  // console.log('inflation_fan.toString() 1st >>>>',inflation_fan.toString());
+
   //here is where the inflation_fanfill is calculated
   var tt = shock_series[shock_series.length-1][0];
-  var pi_t = shock_series[shock_series.length-1] [1];
+  var pi_t = shock_series[shock_series.length-1][1];
+  //this also pushes green dots representing forecast (future times)
   for (var nn = 1; nn <= r.config.forecast_length; nn++) {
     var pi_tn = r.config.dpide*Math.pow(r.config.p, nn-1) * pi_t;
     inflation_fan.push([tt+nn, pi_tn]);
     var pi_stddev = r.config.shock_stddev * Math.sqrt(nn);
     inflation_fanfill.push([tt+nn, pi_tn + pi_stddev, pi_tn - pi_stddev]);
   }
+  
+  // console.log('inflation_fan.toString() 2nd >>>>',inflation_fan.toString());
 
-  //here I'll push in duplicate dots into the fanfill -- I suspect I'll have to drop them in reverse order
-  //this will make the auto-scaling feature for the yaxis work as expected
-  //SHOULD NOT TRUNCATE THE BOTTOM PART OF THE INFLATION FANFILL
+  //duplicate fanfill dots in reverse order
   let extraPointsForFanFill = inflation_fanfill.map((elem)=>{
     return [elem[0],elem[2],elem[1]];
   }).reverse();
-
+  
+  //here I'll push those duplicate dots into the fanfill array
+  //this will trigger the auto-scaling feature for the negative yaxis
+  //SHOULD NOT TRUNCATE THE BOTTOM PART OF THE INFLATION FANFILL
   inflation_fanfill.push(...extraPointsForFanFill);
 
-  $.plot($("#fanplot"), [
-    {
-      data: inflation_fan,
-      color: red,
-      label: "Inflation Forecast",
-      lines: {fillBetween: true}
-    },
-    {
-      data: inflation_fanfill,
-      color: red,
-      lines: {show: true, lineWidth: 0, fill: 0.2},
-      points: {show: false},
-      hoverable: false
-    }
-  ], opts);
+  //does this break anything?
+  // $.plot($("#fanplot"), [
+  //   {
+  //     data: inflation_fan,
+  //     color: red,
+  //     label: "Inflation Forecast",
+  //     lines: {fillBetween: true}
+  //   },
+  //   {
+  //     data: inflation_fanfill,
+  //     color: red,
+  //     lines: {show: true, lineWidth: 0, fill: 0.2},
+  //     points: {show: false},
+  //     hoverable: false
+  //   }
+  // ], opts);
   
   //The output fan plot
   var output_fan = [];
@@ -312,7 +331,7 @@ function replot() {
       var x_tn = r.config.AX5*shock_t1 +r.config.BX5*x_t1 + r.config.CX5*pi_t1 + r.config.DX5*(shock_t-r.config.p*shock_t1);
     }
     // original
-    // output_fan.push([tx+nx, x_tn]);
+    output_fan.push([tx+nx, x_tn]);
     // proposed change.  but first let me investigate why output's are NAN
     // output.series.push([tx+nx, x_tn]);
     var x_stddev = r.config.shock_stddev * Math.sqrt(nx);
@@ -351,6 +370,7 @@ function replot() {
     ], opts);
   }
   if(r.config.pifcst==1){
+    // console.log('inflation_fan.toString() 3rd >>>>',inflation_fan.toString());
     $.plot($("#plot1"), [
       { 
         data: inflation_fan,
@@ -386,41 +406,45 @@ function replot() {
     ], opts);
   }
 
+  /**
+   * 
+   opts.legend.container = "#plot2-legend";
+ 
+   if ( r.config.pifcst === 0 ) {
+     $.plot($("#plot2"), [
+       {
+         data: output_series,
+         color: red,
+         label: "Output"
+       },
+       {
+         data: output_forecast_series,
+         color: blue,
+         label: "Output Forecast"
+       }
+     ], opts);
+   }
+ 
+   if ( r.config.pifcst === 1 ) {
+     
+     $.plot($("#plot2"), [
+       {
+         data: output_series,
+         color: red,
+         label: "Output"
+       },
+       {
+         data: output_forecast_series,
+         color: blue,
+         label: "Output Forecast"
+       }
+     ], opts);
+   }
+   //STOP
+   * 
+   */
   //trying to reinsert the output chart
   //START
-  opts.legend.container = "#plot2-legend";
-
-  if ( r.config.pifcst === 0 ) {
-    $.plot($("#plot2"), [
-      {
-        data: output_series,
-        color: red,
-        label: "Output"
-      },
-      {
-        data: output_forecast_series,
-        color: blue,
-        label: "Output Forecast"
-      }
-    ], opts);
-  }
-
-  if ( r.config.pifcst === 1 ) {
-    
-    $.plot($("#plot2"), [
-      {
-        data: output_series,
-        color: red,
-        label: "Output"
-      },
-      {
-        data: output_forecast_series,
-        color: blue,
-        label: "Output Forecast"
-      }
-    ], opts);
-  }
-  //STOP
   
   opts.legend.container = "#plot3-legend";
 
@@ -569,6 +593,7 @@ function handle_forecast(msg) {
     subperiod++;
     $(".period").text(subperiod);
     if (min_group()) {
+      console.log('what happens here?');
       var draw = rand_shock();
       r.send("shock", {subperiod: subperiod, draw: draw, shock: shockarray[subperiod-1]});
       r.send("progress", {period: r.period, subperiod: subperiod}, {period: 0, group: 0});
@@ -587,9 +612,15 @@ function handle_shock(msg) {
   var last_shock_size = Math.round(parseFloat($(".curr_shock_size").text(), 10));
   $(".curr_shock_size").text(curr_shock_size);
   $(".expected_shock_size").text(Math.round(r.config.p * curr_shock_size));
-  append(shock_series, msg.Value.shock);
   
-  var subperiod = parseInt($(".period").text(), 10);
+  //HACK - 23 Sept 2019
+  //
+  let subperiod = parseInt($(".period").text(), 10);
+  
+  //don't append on the first go
+  if ( subperiod > 1 ) {
+    append(shock_series, msg.Value.shock);
+  }
   
   if (all_forecasts_in()) {
     var inflation_forecasts = [];
@@ -680,10 +711,10 @@ function handle_shock(msg) {
           score = r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_1 - inflation));
         }
         
-        console.log('inflation>>>',inflation);
-        console.log('E_inflation_1',E_inflation_1);
-        console.log('E_inflation_2',E_inflation_2);
-        console.log('score>>>',score);
+        // console.log('inflation>>>',inflation);
+        // console.log('E_inflation_1',E_inflation_1);
+        // console.log('E_inflation_2',E_inflation_2);
+        // console.log('score>>>',score);
         
         r.set_points(r.points + score);
         r.send("points", score, {period: 0, group: 0, subperiod: subperiod});
@@ -759,6 +790,7 @@ function finish_sync() {
   
   var c = document.location.pathname.split('/');
   $(".subject").text(c[c.length - 1].split("@")[0]);
+
   $("#submit_input").click(function() {
     var help;
     var inflation_1 = $("#inflation_1_input").val();
@@ -809,7 +841,8 @@ function finish_sync() {
     if (help === undefined) {
       $("input").attr("disabled", "disabled");
       $("#submit_input").attr("disabled", "disabled");
-      var subperiod = parseInt($(".period").text(), 10);
+      // original
+      let subperiod = parseInt($(".period").text(), 10);
       r.send("forecast", { subperiod: subperiod, inflation_1: inflation_1, inflation_2: inflation_2, expectedErrorT1:expectedErrorT1,expectedErrorT2:expectedErrorT2 });
       r.send("progress", {period: r.period, subperiod: subperiod, forecast: true}, {period: 0, group: 0});
     }
@@ -843,9 +876,12 @@ function finish_sync() {
     if (min_group()) {
       
       //hack to get draw defined at initial runtime
-      // if ( typeof draw === 'undefined' ) {
-      //   draw = rand_shock();
-      // }
+      if ( typeof draw === 'undefined' ) {
+        draw = rand_shock();
+        // draw = -95.88688321878101
+      }
+
+      // console.log('draw',draw);
 
       r.send("shock", {draw: draw, shock: r.config.firstshock});
       r.send("progress", {period: r.period, subperiod: 0}, {period: 0, group: 0});
@@ -922,7 +958,6 @@ $(function() {
   update_tab_nav();
   
   r.recv("forecast", handle_forecast);
-  
   r.recv("shock", handle_shock);
   
   var total_points = 0;
