@@ -165,9 +165,63 @@ shockarray = [8,83,-131,-29,-40,-146,-88,-299,-449,-410,-364,-361,-432,-208,-328
 
 var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,8]];
 
+//SHOCK SEQUENCE 1:
+//Sequence 1a:
+//shockarray = [133,59,-60,143,52,-48,-66,-148,-231,199,330,229,-34,-133,-99,47,-148,-389,-412,-191,-58,26,-2,23,-49,85,-130,-15,-119,-112];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,133]];
+
+//Sequence 1b:
+//shockarray = [24,-191,-120,142,94,59,-63,-40,8,60,-14,-39,243,-157,202,160,222,-92,-129,-110,-7,-223,-65,-196,-103,27,58,175,231,47];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,24]];
+
+
+//SHOCK SEQUENCE 3:
+//Sequence 3a:
+//shockarray = [-70,181,-12,-70,-133,-230,-156,-125,129,41,-116,144,244,109,-135,-135,-98,-19,-45,32,70,-124,-195,-208,-185,-148,-82,-444,-313,-16];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-70]];
+
+//Sequence 3b:
+//shockarray = [-140,43,70,36,45,-180,-113,145,96,60,-62,-39,8,60,-14,-39,243,-157,202,160,222,-91,-129,-110,-7,-223,-65,-196,-103,27];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-140]];
+
+//SHOCK SEQUENCE 5:
+//Sequence 5a:
+//shockarray = [116,-84,-188,-213,-507,-101,-15,-107,118,-157,-103,-90,-10,36,-93,-57,-54,51,173,244,26,25,-145,-228,-131,126,-29,32,-11,140];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,116]];
+
+//Sequence 5b:
+//shockarray = [10,-118,-14,81,159,0,59,47,135,147,201,98,36,153,-191,-175,-266,-202,-30,91,-81,-108,-44,-63,4,54,-91,-75,-322,-34];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,10]];
+
+
+
+//SHOCK SEQUENCE 2:
+//Sequence 2a:
+//shockarray = [-140,43,70,36,45,-180,-113,145,96,60,-62,-39,8,60,-14,-39,243,-157,202,160,222,-91,-129,-110,-7,-223,-65,-196,-103,27];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-140]];
+
 //Sequence 2b:
-shockarray = [-143,-77,28,160,294,179,-94,-151,-225,180,22,110,38,138,-22,-196,-298,-106,-84,-73,144,120,95,262,44,116,176,68,67,-114];
-var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-143]];
+//shockarray = [-143,-77,28,160,294,179,-94,-151,-225,180,22,110,38,138,-22,-196,-298,-106,-84,-73,144,120,95,262,44,116,176,68,67,-114];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-143]];
+
+
+//SHOCK SEQUENCE 4:
+//Sequence 4a:
+//shockarray = [112,-179,-129,-38,-107,1,-9,-128,-52,-65,-91,-145,-74,-284,-214,-193,-230,-45,-122,1,129,53,66,122,59,104,-106,85,-81,-286];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,112]];
+
+//Sequence 4b:
+//shockarray = [191,378,231,2,158,12,-54,85,-133,-332,-134,-24,-1,64,178,229,56,138,101,-8,-161,-7,-50,-23,-117,-270,-131,-83,110,168];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,191]];
+
+//SHOCK SEQUENCE 6:
+//Sequence 6a:
+//shockarray = [-70,181,-12,-70,-133,-230,-156,-125,129,41,-116,144,244,109,-135,-135,-98,-19,-45,32,70,-124,-195,-208,-185,-148,-82,-444,-313,-16];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-70]];
+
+//Sequence 6b:
+//shockarray = [-82,-205,-150,-273,-158,-164,192,259,-180,-45,-209,-152,-65,61,-1,206,54,74,129,85,164,136,-25,-251,100,-22,1,74,57,-86];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-82]];
 
 //Pi-star Inflation target
 var pistar_WR_series = [[-1, 0], [0, 0]];
@@ -647,8 +701,15 @@ function handle_shock(msg) {
 
     //NOTE: RHOLES: these are the new equations for inflation, output, interest_rate
     var inflation = (r.config.rholes_beta+r.config.rholes_kappa*r.config.rholes_gamma_one*r.config.rholes_gamma_two)*e_i - r.config.rholes_gamma_one*r.config.rholes_beta*e_o + r.config.rholes_kappa*r.config.rholes_gamma_one*(r.config.rholes_sigma**-1)*testershock;
-    var output = (r.config.rholes_gamma_one*r.config.rholes_gamma_two*e_i) - (r.config.rholes_gamma_one*(r.config.rholes_kappa**-1)*e_o)
+    // var output = (r.config.rholes_gamma_one*r.config.rholes_gamma_two*e_i) - (r.config.rholes_gamma_one*(r.config.rholes_kappa**-1)*e_o)
+    
+    var output = (r.config.rholes_gamma_one * r.config.rholes_gamma_two * e_i) - 
+                 (r.config.rholes_gamma_one * r.config.rholes_beta * (r.config.rholes_kappa**-1) * e_o) + 
+                 (r.config.rholes_gamma_one * (r.config.rholes_sigma**-1) * testershock);
+    
     var interest_rate =  (r.config.rholes_phipi*inflation) + (r.config.rholes_phix*output);
+
+    console.log('inflation>>>>',inflation);
 
     // var nextpistar_WR = ((pistar_WR - inflation)/r.config.beta)  -  (r.config.lambda/(r.config.kappa*r.config.beta))*(output-last_output) - (r.config.lambda*r.config.sigma/r.config.beta)*output;
 
