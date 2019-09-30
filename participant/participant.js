@@ -193,8 +193,6 @@ var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,8]];
 //shockarray = [10,-118,-14,81,159,0,59,47,135,147,201,98,36,153,-191,-175,-266,-202,-30,91,-81,-108,-44,-63,4,54,-91,-75,-322,-34];
 //var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,10]];
 
-
-
 //SHOCK SEQUENCE 2:
 //Sequence 2a:
 //shockarray = [-140,43,70,36,45,-180,-113,145,96,60,-62,-39,8,60,-14,-39,243,-157,202,160,222,-91,-129,-110,-7,-223,-65,-196,-103,27];
@@ -297,22 +295,16 @@ function replot() {
   var inflation_fanfill = [];
 
   //this is a feature request -- to get the green dots to graph their t+1 prediction (instead of realized inflation @ t+0)
-  let history_of_central_bank_predictions = {};
-
-  // console.log('this is inflation_series.toString()>>>>',inflation_series.toString());
-  // console.log('inflation_fan.toString() blank >>>>',inflation_fan.toString());
+  // let history_of_central_bank_predictions = {};
 
   //this loop pushes the last inflation into the green dots array
   //aka --> pushes red dots into the green dots array
   for (var ii in inflation_series) {
     //if its the zeroth period or after
     if (inflation_series[ii][0] >= 0) {
-      // console.log('inflation_series[ii]:',inflation_series[ii]);
       inflation_fan.push(inflation_series[ii]);
     }
   }
-
-  // console.log('inflation_fan.toString() 1st >>>>',inflation_fan.toString());
 
   //here is where the inflation_fanfill is calculated
   var tt = shock_series[shock_series.length-1][0];
@@ -325,34 +317,26 @@ function replot() {
     inflation_fanfill.push([tt+nn, pi_tn + pi_stddev, pi_tn - pi_stddev]);
   }
   
-  // console.log('inflation_fan.toString() 2nd >>>>',inflation_fan.toString());
 
   //duplicate fanfill dots in reverse order
   let extraPointsForFanFill = inflation_fanfill.map((elem)=>{
     return [elem[0],elem[2],elem[1]];
   }).reverse();
   
-  //here I'll push those duplicate dots into the fanfill array
-  //this will trigger the auto-scaling feature for the negative yaxis
   //SHOULD NOT TRUNCATE THE BOTTOM PART OF THE INFLATION FANFILL
   inflation_fanfill.push(...extraPointsForFanFill);
 
-  //does this break anything?
-  // $.plot($("#fanplot"), [
-  //   {
-  //     data: inflation_fan,
-  //     color: red,
-  //     label: "Inflation Forecast",
-  //     lines: {fillBetween: true}
-  //   },
-  //   {
-  //     data: inflation_fanfill,
-  //     color: red,
-  //     lines: {show: true, lineWidth: 0, fill: 0.2},
-  //     points: {show: false},
-  //     hoverable: false
-  //   }
-  // ], opts);
+  //create fanfill w/correct values from expected_error_t+1
+  let fanFillForErrorSeriesT1 = expected_error_series_t1.map((elem)=>{
+    let expectedErrorT1 = Math.abs(parseInt(elem[1]));
+    return [elem[0]+2,expectedErrorT1,expectedErrorT1*-1];
+  })
+  
+  //create fanfill w/correct values from expected_error_t+2
+  let fanFillForErrorSeriesT2 = expected_error_series_t2.map((elem)=>{
+    let expectedErrorT2 = Math.abs(parseInt(elem[1]));
+    return [elem[0]+3,expectedErrorT2,expectedErrorT2*-1];
+  })
   
   //The output fan plot
   var output_fan = [];
@@ -407,104 +391,95 @@ function replot() {
       hoverable: false
     }
   ], opts);
-  
   opts.legend.container = "#plot1-legend"; // places the legend outside the plot, in the DOM
-  if(r.config.pifcst==0){ 
-    $.plot($("#plot1"), [
-      {
-        data: inflation_series,
-        color: red,
-        label: "Inflation"
-      },
-      {
-        data: inflation_1_forecast_series,
-        color: blue,
-        label: "Inflation Forecast"
-      },
-    ], opts);
-  }
-  if(r.config.pifcst==1){
-    // console.log('inflation_fan.toString() 3rd >>>>',inflation_fan.toString());
-    $.plot($("#plot1"), [
-      { 
-        data: inflation_fan,
-        color: green,
-        label: "Central Bank's Inflation Forecast",
-        lines: {fillBetween: true}
-      },
-      //NOTE: RHOLES: comment out below to disable the green fan
-      //(EVERYTHING BETWEEN AND INCLUDING THE OPENING CURLY/CLOSING CURLY + COMMA)
-      //has the key-value pair "data: inflation_fanfill"
-      {
-        data: inflation_fanfill,
-        color: green,
-        lines: {show: true, lineWidth: 0, fill: 0.2},
-        points: {show: false},
-        hoverable: false
-      },
-      {
-        data: inflation_series,
-        color: red,
-        label: "Inflation"
-      },
-      {
-        data: inflation_1_forecast_series,
-        color: blue,
-        label: "Inflation Forecast @ period+1 (Π@t+1)"
-      },
-      {
-        data: inflation_2_forecast_series,
-        color: orange,
-        label: "Inflation Forecast @ period+2 (Π@t+2)"
-      },
-    ], opts);
-  }
 
-  /**
-   * 
-   opts.legend.container = "#plot2-legend";
- 
-   if ( r.config.pifcst === 0 ) {
-     $.plot($("#plot2"), [
-       {
-         data: output_series,
-         color: red,
-         label: "Output"
-       },
-       {
-         data: output_forecast_series,
-         color: blue,
-         label: "Output Forecast"
-       }
-     ], opts);
-   }
- 
-   if ( r.config.pifcst === 1 ) {
-     
-     $.plot($("#plot2"), [
-       {
-         data: output_series,
-         color: red,
-         label: "Output"
-       },
-       {
-         data: output_forecast_series,
-         color: blue,
-         label: "Output Forecast"
-       }
-     ], opts);
-   }
-   //STOP
-   * 
-   */
-  //trying to reinsert the output chart
-  //START
-  
+  $.plot($("#plot1"), [
+    { 
+      data: inflation_fan,
+      color: green,
+      label: "Central Bank's Inflation Forecast",
+      lines: {fillBetween: true}
+    },
+    //NOTE: RHOLES: comment out below to disable the green fan
+    //(EVERYTHING BETWEEN AND INCLUDING THE OPENING CURLY/CLOSING CURLY + COMMA)
+    //has the key-value pair "data: inflation_fanfill"
+    {
+      data: inflation_fanfill,
+      color: green,
+      lines: {show: true, lineWidth: 0, fill: 0.2},
+      points: {show: false},
+      hoverable: false
+    },
+    {
+      data: inflation_series,
+      color: red,
+      label: "Inflation"
+    },
+    {
+      data: inflation_1_forecast_series,
+      color: blue,
+      label: "Inflation Forecast @ period+1 (Π@t+1)"
+    },
+    {
+      data: fanFillForErrorSeriesT1,
+      color: blue,
+      lines: {show: true, lineWidth: 0, fill: 0.2},
+      points: {show: false},
+      hoverable: false
+    },
+  ], opts);
+
+  opts.legend.container = "#plot2-legend"
+  $.plot($("#plot2"), [
+    { 
+      data: inflation_fan,
+      color: green,
+      label: "Central Bank's Inflation Forecast",
+      lines: {fillBetween: true}
+    },
+    {
+      data: inflation_fanfill,
+      color: green,
+      lines: {show: true, lineWidth: 0, fill: 0.2},
+      points: {show: false},
+      hoverable: false
+    },
+    {
+      data: inflation_series,
+      color: red,
+      label: "Inflation"
+    },
+    {
+      data: inflation_2_forecast_series,
+      color: orange,
+      label: "Inflation Forecast @ period+2 (Π@t+2)"
+    },
+    {
+      data: fanFillForErrorSeriesT2,
+      color: orange,
+      lines: {show: true, lineWidth: 0, fill: 0.2},
+      points: {show: false},
+      hoverable: false
+    },
+  ], opts);
+
   opts.legend.container = "#plot3-legend";
 
-  if(r.config.irfcst==0){
-    $.plot($("#plot3"), [
-        {
+  $.plot($("#plot3"), [
+    { 
+      data: interest_fan,
+      color: green,
+      label: "Central Bank's Interest Rate Forecast",
+      lines: {fillBetween: true}
+    },
+    {
+      data: interest_fanfill,
+      color: green,
+      lines: {show: true, lineWidth: 0, fill: 0.2},
+      points: {show: false},
+      hoverable: false
+    },
+    {
       data: shock_series,
       label: "Shock"
     },
@@ -512,37 +487,8 @@ function replot() {
       data: interest_rate_series,
       label: "Interest Rate"
     }
-    
-    ], opts);
-    opts.legend.container = null;
-  }
-  
-  if(r.config.irfcst==1){
-    $.plot($("#plot3"), [
-      { 
-        data: interest_fan,
-        color: green,
-        label: "Central Bank's Interest Rate Forecast",
-        lines: {fillBetween: true}
-      },
-      {
-        data: interest_fanfill,
-        color: green,
-        lines: {show: true, lineWidth: 0, fill: 0.2},
-        points: {show: false},
-        hoverable: false
-      },
-      {
-        data: shock_series,
-        label: "Shock"
-      },
-      {
-        data: interest_rate_series,
-        label: "Interest Rate"
-      }
-    ], opts);
-    opts.legend.container = null;
-  }
+  ], opts);
+  opts.legend.container = null;
 }
 
 // show the current tab, hide all others
