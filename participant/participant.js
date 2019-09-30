@@ -328,14 +328,17 @@ function replot() {
 
   //create fanfill w/correct values from expected_error_t+1
   let fanFillForErrorSeriesT1 = expected_error_series_t1.map((elem)=>{
+    let inflationPredictionT1 = parseInt(inflation_1_forecast_series[elem[0]][1]);
     let expectedErrorT1 = Math.abs(parseInt(elem[1]));
-    return [elem[0]+2,expectedErrorT1,expectedErrorT1*-1];
+    return [elem[0]+2,expectedErrorT1+inflationPredictionT1,(expectedErrorT1*-1)+inflationPredictionT1];
   })
+
   
   //create fanfill w/correct values from expected_error_t+2
   let fanFillForErrorSeriesT2 = expected_error_series_t2.map((elem)=>{
+    let inflationPredictionT2 = parseInt(inflation_2_forecast_series[elem[0]][1]);
     let expectedErrorT2 = Math.abs(parseInt(elem[1]));
-    return [elem[0]+3,expectedErrorT2,expectedErrorT2*-1];
+    return [elem[0]+3,expectedErrorT2+inflationPredictionT2,(expectedErrorT2*-1)+inflationPredictionT2];
   })
   
   //The output fan plot
