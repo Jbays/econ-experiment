@@ -469,19 +469,6 @@ function replot() {
   opts.legend.container = "#plot3-legend";
 
   $.plot($("#plot3"), [
-    { 
-      data: interest_fan,
-      color: green,
-      label: "Central Bank's Interest Rate Forecast",
-      lines: {fillBetween: true}
-    },
-    {
-      data: interest_fanfill,
-      color: green,
-      lines: {show: true, lineWidth: 0, fill: 0.2},
-      points: {show: false},
-      hoverable: false
-    },
     {
       data: shock_series,
       label: "Shock"
