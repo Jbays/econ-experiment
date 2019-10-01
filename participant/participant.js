@@ -221,9 +221,6 @@ var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,8]];
 //shockarray = [-82,-205,-150,-273,-158,-164,192,259,-180,-45,-209,-152,-65,61,-1,206,54,74,129,85,164,136,-25,-251,100,-22,1,74,57,-86];
 //var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-82]];
 
-//Pi-star Inflation target
-var pistar_WR_series = [[-1, 0], [0, 0]];
-var nextpistar_WR_series = [[-1, 0], [0, 0], [1,0]];
 //Old output gap Change
 var old_x_change_series = [[-2, 0], [-1, 0], [0, 0]];
 
@@ -294,9 +291,6 @@ function replot() {
   var inflation_fan = [];
   var inflation_fanfill = [];
 
-  //this is a feature request -- to get the green dots to graph their t+1 prediction (instead of realized inflation @ t+0)
-  // let history_of_central_bank_predictions = {};
-
   //this loop pushes the last inflation into the green dots array
   //aka --> pushes red dots into the green dots array
   for (var ii in inflation_series) {
@@ -317,7 +311,6 @@ function replot() {
     inflation_fanfill.push([tt+nn, pi_tn + pi_stddev, pi_tn - pi_stddev]);
   }
   
-
   //duplicate fanfill dots in reverse order
   let extraPointsForFanFill = inflation_fanfill.map((elem)=>{
     return [elem[0],elem[2],elem[1]];
@@ -332,7 +325,6 @@ function replot() {
     let expectedErrorT1 = Math.abs(parseInt(elem[1]));
     return [elem[0]+2,expectedErrorT1+inflationPredictionT1,(expectedErrorT1*-1)+inflationPredictionT1];
   })
-
   
   //create fanfill w/correct values from expected_error_t+2
   let fanFillForErrorSeriesT2 = expected_error_series_t2.map((elem)=>{
@@ -371,10 +363,7 @@ function replot() {
     if(nx==5){  
       var x_tn = r.config.AX5*shock_t1 +r.config.BX5*x_t1 + r.config.CX5*pi_t1 + r.config.DX5*(shock_t-r.config.p*shock_t1);
     }
-    // original
     output_fan.push([tx+nx, x_tn]);
-    // proposed change.  but first let me investigate why output's are NAN
-    // output.series.push([tx+nx, x_tn]);
     var x_stddev = r.config.shock_stddev * Math.sqrt(nx);
     output_fanfill.push([tx+nx, x_tn + x_stddev, x_tn - x_stddev]);
   }
@@ -560,8 +549,6 @@ function handle_forecast(msg) {
     append(inflation_1_forecast_series, msg.Value.inflation_1, 2);
     append(inflation_2_forecast_series, msg.Value.inflation_2, 3);
 
-    //this is where you append the realized / actual output -- but I don't know what that means entirely
-    //append(output_forecast_series, msg.Value.output,2)
     //here is where the expected_error is appended to the expected_error_series array.
     append(expected_error_series_t1, msg.Value.expectedErrorT1);
     append(expected_error_series_t2, msg.Value.expectedErrorT2);
@@ -604,7 +591,6 @@ function handle_shock(msg) {
   $(".expected_shock_size").text(Math.round(r.config.p * curr_shock_size));
   
   //HACK - 23 Sept 2019
-  //
   let subperiod = parseInt($(".period").text(), 10);
   
   //don't append on the first go
@@ -623,20 +609,16 @@ function handle_shock(msg) {
     }
     var e_i = median(inflation_1_forecast_series); 
     var e_o = median(inflation_2_forecast_series);
-    // var e_i = median(inflation_forecasts); 
-    // var e_o = median(output_forecasts);
     
-    var last_inflation = inflation_series[inflation_series.length - 1][1];
+    // var last_inflation = inflation_series[inflation_series.length - 1][1];
     var last_output = output_series[output_series.length - 1][1];
-    
     var old_x_change = last_output - output_series[output_series.length - 2][1];
-    // var last_pistar = pistar_WR_series[pistar_WR_series.length - 1][1];
-    // var pistar_WR = ((last_pistar - last_inflation)/r.config.beta)  -  (r.config.lambda/(r.config.kappa*r.config.beta))*(old_x_change) - (r.config.lambda*r.config.sigma/r.config.beta)*last_output;
-
     var testershock = shockarray[subperiod-2];
 
     //NOTE: RHOLES: these are the new equations for inflation, output, interest_rate
-    var inflation = (r.config.rholes_beta+r.config.rholes_kappa*r.config.rholes_gamma_one*r.config.rholes_gamma_two)*e_i - r.config.rholes_gamma_one*r.config.rholes_beta*e_o + r.config.rholes_kappa*r.config.rholes_gamma_one*(r.config.rholes_sigma**-1)*testershock;
+    var inflation = (r.config.rholes_beta+r.config.rholes_kappa*r.config.rholes_gamma_one*r.config.rholes_gamma_two)*e_i - 
+                    r.config.rholes_gamma_one*r.config.rholes_beta*e_o + 
+                    r.config.rholes_kappa*r.config.rholes_gamma_one*(r.config.rholes_sigma**-1)*testershock;
     // var output = (r.config.rholes_gamma_one*r.config.rholes_gamma_two*e_i) - (r.config.rholes_gamma_one*(r.config.rholes_kappa**-1)*e_o)
     
     var output = (r.config.rholes_gamma_one * r.config.rholes_gamma_two * e_i) - 
@@ -647,11 +629,6 @@ function handle_shock(msg) {
 
     console.log('inflation>>>>',inflation);
 
-    // var nextpistar_WR = ((pistar_WR - inflation)/r.config.beta)  -  (r.config.lambda/(r.config.kappa*r.config.beta))*(output-last_output) - (r.config.lambda*r.config.sigma/r.config.beta)*output;
-
-    // pistar_WR = Math.round(pistar_WR);
-    // nextpistar_WR = Math.round(nextpistar_WR);
-
     interest_rate = Math.round(interest_rate);
     output = Math.round(output);
     inflation = Math.round(inflation);
@@ -661,7 +638,6 @@ function handle_shock(msg) {
     append(inflation_series, inflation);
     append(output_series, output);
     append(output_forecast_series, output);
-    // append(pistar_WR_series, pistar_WR); 
     
     if (r.username in one_previous_forecast) {
       //I don't think this conditional will ever hit
@@ -670,58 +646,66 @@ function handle_shock(msg) {
         r.send("points", 0, {period: 0, group: 0});
         
         $(".last_inflation_forecast").text("N/A");
-        // $(".last_inflationfour_forecast").text("N/A");
         $(".last_output_forecast").text("N/A");
         $(".last_inflation_forecast_error").text("N/A");
         $(".last_output_forecast_error").text("N/A");
         $(".last_score").text("0");
       } else {
-        /**
-         * original untouched
-         * 
-          // use forecast from 2 periods ago, not 1
-          E_inflation = parseInt(one_previous_forecast[r.username].inflation, 10);
-          //this output variable is actually E_inflation_2
-          E_output = parseInt(one_previous_forecast[r.username].output, 10);
-
-          // E_inflation = parseInt(one_previous_forecast[r.username].inflation_1, 10);
-          // E_output = parseInt(one_previous_forecast[r.username].inflation_2, 10);
-        **/
-       
+        let score = 0;
+        let randomNumber = Math.random();
+        
         let E_inflation_1 = parseInt(one_previous_forecast[r.username].inflation_1, 10);
         let E_inflation_2;
-       
         let E_inflation_2_from_three_periods_ago;
         
-        let score;
-       
-        if ( inflation_2_forecast_series.length > 2 ) {
-          E_inflation_2_from_three_periods_ago = inflation_2_forecast_series[inflation_2_forecast_series.length-3][1];
-          E_inflation_2 = parseInt(E_inflation_2_from_three_periods_ago, 10);
-
-          //score equals the accuracy of their predictions for the inflation at t+1, t+2,
-          score =
-          r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_1 - inflation)) +
-          r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_2 - inflation));
+        //participant gets scored either on their inflation prediction OR their expected error on said prediction.
+        //should be 50/50.
+        // if ( randomNumber < 0.5 ) {
+        if ( randomNumber > 1 ) {
+          console.log('now you score their inflation prediction!');
+          //score their inflation prediction
+          
+          //if the third period or after
+          if ( inflation_2_forecast_series.length > 2 ) {
+            E_inflation_2_from_three_periods_ago = inflation_2_forecast_series[inflation_2_forecast_series.length-3][1];
+            E_inflation_2 = parseInt(E_inflation_2_from_three_periods_ago, 10);
+  
+            //score equals the accuracy of their predictions for the inflation at t+1, t+2,
+            score =
+              r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_1 - inflation)) +
+              r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_2 - inflation));
+          } else {
+            //score equals the accuracy of their predictions for the inflation at t+1
+            score = r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_1 - inflation));
+          }
+          
         } else {
-          //score equals the accuracy of their predictions for the inflation at t+1
-          score = r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_1 - inflation));
+          console.log('score their prediction for their inflation error bar');
+          //take the expected error from the previous period
+          let previous_expected_error_t_1 = parseInt(expected_error_series_t1[expected_error_series_t1.length-1][1]);
+          // let previous_expected_error_t_1 = parseInt(expected_error_series_t1[expected_error_series_t1.length-1][1]);
+          
+          if ( inflation_2_forecast_series.length > 2 ) {
+            let previous_expected_error_t_2 = parseInt(expected_error_series_t2[expected_error_series_t2.length-2][1]);
+
+            if ( (E_inflation_2 + previous_expected_error_t_2) > inflation || 
+                 (E_inflation_2 - previous_expected_error_t_2) < inflation ) {
+              score = 15 / (10+previous_expected_error_t_1+previous_expected_error_t_2)
+            }
+          } else {
+            if ( (E_inflation_1 + previous_expected_error_t_1) > inflation || 
+                 (E_inflation_1 - previous_expected_error_t_1) < inflation ) {
+              score = 15 / (10+previous_expected_error_t_1);
+            }
+          }
         }
-        
-        // console.log('inflation>>>',inflation);
-        // console.log('E_inflation_1',E_inflation_1);
-        // console.log('E_inflation_2',E_inflation_2);
-        // console.log('score>>>',score);
-        
+
+        console.log('after everything, this is your score>>>',score);
         r.set_points(r.points + score);
         r.send("points", score, {period: 0, group: 0, subperiod: subperiod});
-        
-        $(".last_inflation_forecast").text(E_inflation_1.toFixed(0));
-        // $(".last_inflationfour_forecast").text(E_inflationfour.toFixed(0));
 
-        // $(".last_output_forecast").text(E_output.toFixed(0));
+        $(".last_inflation_forecast").text(E_inflation_1.toFixed(0));
         $(".last_inflation_forecast_error").text(Math.abs(E_inflation_1 - inflation).toFixed(0));
-        // $(".last_output_forecast_error").text(Math.abs(E_output - output).toFixed(0));
         $(".last_score").text(score.toFixed(2));
       }
     }
@@ -731,13 +715,10 @@ function handle_shock(msg) {
       one_previous_forecast[subject] = forecasts[subject];
       forecasts[subject] = undefined;
     }
-    $(".last_inflation").text(inflation);
-    $(".last_output").text(output);
+    // $(".last_inflation").text(inflation);
+    // $(".last_output").text(output);
 
     var next_interest_rate = interest_rate;
-
-    // $(".nextpistar_WR").text(nextpistar_WR);
-    // append(nextpistar_WR_series, nextpistar_WR);
 
     $(".curr_interest_rate").text(next_interest_rate);
     append(interest_rate_series, next_interest_rate);
@@ -753,8 +734,6 @@ function handle_shock(msg) {
         output: output,
         inflation: inflation,
         next_interest_rate: next_interest_rate,
-        // pistar_WR: pistar_WR,
-        // nextpistar_WR: nextpistar_WR,
         old_x_change: old_x_change
       });
     }
@@ -766,8 +745,8 @@ function handle_shock(msg) {
     update_input_state_ticker();
     if (ROBOTS && !r.__sync__.in_progress) {
       robot = setTimeout(function() {
-        var inflation = rand.uniform(40, -50); 
-        var output = rand.uniform(40, -50); 
+        // var inflation = rand.uniform(40, -50); 
+        // var output = rand.uniform(40, -50); 
         r.send("forecast", { subperiod: subperiod, inflation_1: inflation_1, inflation_2: inflation_2 });
         r.send("progress", { period: r.period, subperiod: subperiod, forecast: true}, {period: 0, group: 0});
       }, Math.round(1000 + Math.random() * 3000));
@@ -877,9 +856,6 @@ function finish_sync() {
         draw = rand_shock();
         // draw = -95.88688321878101
       }
-
-      // console.log('draw',draw);
-
       r.send("shock", {draw: draw, shock: r.config.firstshock});
       r.send("progress", {period: r.period, subperiod: 0}, {period: 0, group: 0});
     }
@@ -914,7 +890,6 @@ function finish_sync() {
       $(".time_remaining").text("Time Remaining: 0");
       $(".time_remaining,.prompt").toggleClass("red");
       if (r.config.block === false && secondsLeft <= -5) {
-        // r.send("forecast", { inflation: NaN, output: NaN });
         r.send("forecast", { inflation_1: NaN, inflation_2: NaN });
         var subperiod = parseInt($(".period").text(), 10);
         r.send("progress", {period: r.period, subperiod: subperiod, forecast: true}, {period: 0, group: 0});
@@ -931,10 +906,9 @@ function finish_sync() {
   if (period <= r.config.subperiods) {
     if (ROBOTS && typeof robots === "undefined") {
       robot = setTimeout(function() {
-        var inflation = last_inflation;
-        var output = last_output;
+        // var inflation = last_inflation;
+        // var output = last_output;
         r.send("forecast", { inflation_1: inflation_1, inflation_2: inflation_2 });
-        // r.send("forecast", { inflation: inflation, output: output });
         var subperiod = parseInt($(".period").text(), 10);
         r.send("progress", {period: r.period, subperiod: subperiod, forecast: true}, {period: 0, group: 0});
       }, Math.round(1000 + Math.random() * 10000));
