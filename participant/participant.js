@@ -506,7 +506,14 @@ function setup_tooltip() {
         if (item.series.label === undefined) {
           label = "Period " + period + " = " + y;
         } else if (item.series.label.indexOf("Forecast") !== -1) {
-          label = item.series.label + " for Period " + period + " = " + y;
+          //if dot color is orange, have one style of label
+          if ( item.series.color === '#FFA500') {
+            label = `Inflation Prediction from Period ${period-2} for Period ${period} = ${y}`;
+          }  else if (item.series.color === '#3465a4' ) {
+            label = `Inflation Prediction from Period ${period-1} for Period ${period} = ${y}`;
+          } else {
+            label = item.series.label + " for Period " + period + " = " + y;
+          }
         } else {
           label = item.series.label + " at Period " + period + " = " + y;
         }
@@ -627,7 +634,6 @@ function handle_shock(msg) {
     
     var interest_rate =  (r.config.rholes_phipi*inflation) + (r.config.rholes_phix*output);
 
-    console.log('inflation>>>>',inflation);
 
     interest_rate = Math.round(interest_rate);
     output = Math.round(output);
@@ -660,9 +666,7 @@ function handle_shock(msg) {
         
         //participant gets scored either on their inflation prediction OR their expected error on said prediction.
         //should be 50/50.
-        // if ( randomNumber < 0.5 ) {
-        if ( randomNumber > 1 ) {
-          console.log('now you score their inflation prediction!');
+        if ( randomNumber < 0.5 ) {
           //score their inflation prediction
           
           //if the third period or after
@@ -680,7 +684,6 @@ function handle_shock(msg) {
           }
           
         } else {
-          console.log('score their prediction for their inflation error bar');
           //take the expected error from the previous period
           let previous_expected_error_t_1 = parseInt(expected_error_series_t1[expected_error_series_t1.length-1][1]);
           // let previous_expected_error_t_1 = parseInt(expected_error_series_t1[expected_error_series_t1.length-1][1]);
@@ -700,7 +703,6 @@ function handle_shock(msg) {
           }
         }
 
-        console.log('after everything, this is your score>>>',score);
         r.set_points(r.points + score);
         r.send("points", score, {period: 0, group: 0, subperiod: subperiod});
 
