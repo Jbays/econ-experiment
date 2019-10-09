@@ -682,24 +682,34 @@ function handle_shock(msg) {
             //score equals the accuracy of their predictions for the inflation at t+1
             score = r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_1 - inflation));
           }
-          
         } else {
+          // console.log('score their error band prediction');
+          // console.log('calculated inflation>>>',inflation);
+          
           //take the expected error from the previous period
           let previous_expected_error_t_1 = parseInt(expected_error_series_t1[expected_error_series_t1.length-1][1]);
-          // let previous_expected_error_t_1 = parseInt(expected_error_series_t1[expected_error_series_t1.length-1][1]);
+          let previous_expected_error_t_2;
+          // console.log('previous_expected_error_t_1',previous_expected_error_t_1)
           
           if ( inflation_2_forecast_series.length > 2 ) {
-            let previous_expected_error_t_2 = parseInt(expected_error_series_t2[expected_error_series_t2.length-2][1]);
+            previous_expected_error_t_2 = parseInt(expected_error_series_t2[expected_error_series_t2.length-2][1]);
+            E_inflation_2_from_three_periods_ago = inflation_2_forecast_series[inflation_2_forecast_series.length-3][1];
+            E_inflation_2 = parseInt(E_inflation_2_from_three_periods_ago, 10);
+            // console.log('previous_expected_error_t_2',previous_expected_error_t_2);
+            // console.log('E_inflation_2',E_inflation_2);
 
             if ( (E_inflation_2 + previous_expected_error_t_2) > inflation || 
                  (E_inflation_2 - previous_expected_error_t_2) < inflation ) {
-              score = 15 / (10+previous_expected_error_t_1+previous_expected_error_t_2)
+              score = 15 / (10+previous_expected_error_t_2)
             }
-          } else {
-            if ( (E_inflation_1 + previous_expected_error_t_1) > inflation || 
-                 (E_inflation_1 - previous_expected_error_t_1) < inflation ) {
-              score = 15 / (10+previous_expected_error_t_1);
-            }
+          }
+          // console.log('score after t_2 calc',score)
+          
+          if ( (E_inflation_1 + previous_expected_error_t_1) > inflation || 
+               (E_inflation_1 - previous_expected_error_t_1) < inflation ) {
+            // let donut = 15 / (10+previous_expected_error_t_1);
+            // console.log('donut after t_1 calc',donut)
+            score += 15 / (10+previous_expected_error_t_1);
           }
         }
 
