@@ -47,12 +47,14 @@ function update_input_state_ticker() {
 // returns the median of the given array
 function median(array) {
   console.log('hello from median!');
-  console.log('this is array',array);
+  console.log('this is array',array.toString());
   a = [];
   for (var i = 0; i < array.length; i++) {
     a.push(parseInt(array[i], 10));
   }
   a.sort(function(a, b) { return a-b; });
+
+  console.log('a.length%2===0',a.length%2===0);
   if (a.length % 2 === 0) {
     return (a[a.length/2] + a[(a.length/2)-1]) / 2;
   } else {
@@ -615,8 +617,8 @@ function handle_shock(msg) {
         output_forecasts.push(forecasts[subject].output);
       }
     }
-    console.log('inflation_1_forecast_series',inflation_1_forecast_series);
-    console.log('inflation_2_forecast_series',inflation_2_forecast_series);
+    console.log('inflation_1_forecast_series',inflation_1_forecast_series.toString());
+    console.log('inflation_2_forecast_series',inflation_2_forecast_series.toString());
     var median_of_t_1 = median(inflation_1_forecast_series); 
     var median_of_t_2 = median(inflation_2_forecast_series);
 
