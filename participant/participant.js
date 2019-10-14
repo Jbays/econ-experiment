@@ -671,18 +671,26 @@ function handle_shock(msg) {
   
   if (all_forecasts_in()) {
     var inflation_forecasts = [];
-var inflationfour_forecasts = [];
+    var inflationfour_forecasts = [];
     var output_forecasts = [];
+    //i predicted forecasts had forecasts for key-value pairs right before for-in loop
+    //not true.
+    //let's see if JSON.stringify helps me understand why
+    console.log('this is forecasts before the for-in loop',JSON.stringify(forecasts));
     for (var subject in forecasts) {
       if (forecasts[subject].inflation !== null && forecasts[subject].output !== null) {
+        console.log('forecasts[subject].inflation !== null && forecasts[subject].output !== null')
+
         inflation_forecasts.push(forecasts[subject].inflation);
-inflationfour_forecasts.push(forecasts[subject].inflationfour);
+        inflationfour_forecasts.push(forecasts[subject].inflationfour);
         output_forecasts.push(forecasts[subject].output);
       }
     }
-    console.log('inflation_forecasts.toString() right before e_i',inflation_forecasts)
+    //inflation_forecasts is the variable i need to populate with elements to get the economy to become responsive
+
+    console.log('inflation_forecasts.toString() right before e_i',inflation_forecasts.toString());
     var e_i = median(inflation_forecasts); 
-    console.log('e_i.toString()',e_i);
+    console.log('e_i.toString()',e_i.toString());
 var e_i_four = median(inflationfour_forecasts);
     var e_o = median(output_forecasts);
     
