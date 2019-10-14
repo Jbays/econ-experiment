@@ -609,22 +609,25 @@ function handle_shock(msg) {
   }
   
   if (all_forecasts_in()) {
-    var inflation_forecasts = [];
-    var output_forecasts = [];
-    console.log('forecasts',forecasts);
-    for (var subject in forecasts) {
-      if (forecasts[subject].inflation !== null && forecasts[subject].output !== null) {
-        inflation_forecasts.push(forecasts[subject].inflation);
-        output_forecasts.push(forecasts[subject].output);
+    let inflation_1_forecasts_for_all_players = [];
+    let inflation_2_forecasts_for_all_players = [];
+    console.log('JSON.stringify(forecasts)',JSON.stringify(forecasts));
+
+    for (let subject in forecasts) {
+      if (forecasts[subject].inflation_1 !== null && forecasts[subject].inflation_2 !== null) {
+        //these variables were mislabeled.  should be inflation_1 and inflation_2 for inflation and output (respectively)
+        inflation_1_forecasts_for_all_players.push(forecasts[subject].inflation_1);
+        inflation_2_forecasts_for_all_players.push(forecasts[subject].inflation_2);
       }
     }
 
-    console.log('inflation_forecasts.toString()',inflation_forecasts.toString());
+    console.log('inflation_1_forecasts_for_all_players.toString()',inflation_1_forecasts_for_all_players.toString());
+    console.log('inflation_2_forecasts_for_all_players.toString()',inflation_2_forecasts_for_all_players.toString());
 
     // console.log('inflation_1_forecast_series',inflation_1_forecast_series.toString());
     // console.log('inflation_2_forecast_series',inflation_2_forecast_series.toString());
-    var median_of_t_1 = median(inflation_1_forecast_series); 
-    var median_of_t_2 = median(inflation_2_forecast_series);
+    var median_of_t_1 = median(inflation_1_forecasts_for_all_players); 
+    var median_of_t_2 = median(inflation_2_forecasts_for_all_players);
 
     console.log('this is median_of_t_1',median_of_t_1);
     console.log('this is median_of_t_2',median_of_t_2);
