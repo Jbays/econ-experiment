@@ -46,6 +46,8 @@ function update_input_state_ticker() {
 }
 // returns the median of the given array
 function median(array) {
+  console.log('hello from median!');
+  console.log('this is array',array);
   a = [];
   for (var i = 0; i < array.length; i++) {
     a.push(parseInt(array[i], 10));
@@ -613,8 +615,13 @@ function handle_shock(msg) {
         output_forecasts.push(forecasts[subject].output);
       }
     }
-    var e_i = median(inflation_1_forecast_series); 
-    var e_o = median(inflation_2_forecast_series);
+    console.log('inflation_1_forecast_series',inflation_1_forecast_series);
+    console.log('inflation_2_forecast_series',inflation_2_forecast_series);
+    var median_of_t_1 = median(inflation_1_forecast_series); 
+    var median_of_t_2 = median(inflation_2_forecast_series);
+
+    console.log('this is median_of_t_1',median_of_t_1);
+    console.log('this is median_of_t_2',median_of_t_2);
     
     // var last_inflation = inflation_series[inflation_series.length - 1][1];
     var last_output = output_series[output_series.length - 1][1];
@@ -622,13 +629,13 @@ function handle_shock(msg) {
     var testershock = shockarray[subperiod-2];
 
     //NOTE: RHOLES: these are the new equations for inflation, output, interest_rate
-    var inflation = (r.config.rholes_beta+r.config.rholes_kappa*r.config.rholes_gamma_one*r.config.rholes_gamma_two)*e_i - 
-                    r.config.rholes_gamma_one*r.config.rholes_beta*e_o + 
+    var inflation = (r.config.rholes_beta+r.config.rholes_kappa*r.config.rholes_gamma_one*r.config.rholes_gamma_two)*median_of_t_1 - 
+                    r.config.rholes_gamma_one*r.config.rholes_beta*median_of_t_2 + 
                     r.config.rholes_kappa*r.config.rholes_gamma_one*(r.config.rholes_sigma**-1)*testershock;
     // var output = (r.config.rholes_gamma_one*r.config.rholes_gamma_two*e_i) - (r.config.rholes_gamma_one*(r.config.rholes_kappa**-1)*e_o)
     
-    var output = (r.config.rholes_gamma_one * r.config.rholes_gamma_two * e_i) - 
-                 (r.config.rholes_gamma_one * r.config.rholes_beta * (r.config.rholes_kappa**-1) * e_o) + 
+    var output = (r.config.rholes_gamma_one * r.config.rholes_gamma_two * median_of_t_1) - 
+                 (r.config.rholes_gamma_one * r.config.rholes_beta * (r.config.rholes_kappa**-1) * median_of_t_2) + 
                  (r.config.rholes_gamma_one * (r.config.rholes_sigma**-1) * testershock);
     
     var interest_rate =  (r.config.rholes_phipi*inflation) + (r.config.rholes_phix*output);
@@ -638,8 +645,8 @@ function handle_shock(msg) {
     output = Math.round(output);
     inflation = Math.round(inflation);
     
-    append(e_i_series, e_i);
-    append(e_o_series, e_o);
+    append(e_i_series, median_of_t_1);
+    append(e_o_series, median_of_t_2);
     append(inflation_series, inflation);
     append(output_series, output);
     append(output_forecast_series, output);
@@ -709,28 +716,8 @@ function handle_shock(msg) {
           
           if ( (E_inflation_1 + previous_expected_error_t_1) >= inflation && 
                (E_inflation_1 - previous_expected_error_t_1) <= inflation ) {
-            // let donut = 15 / (10+previous_expected_error_t_1);
-            // console.log('donut after t_1 calc',donut)
             score += 15 / (10+previous_expected_error_t_1);
           }
-
-          // let should_award_points_for_t_1 = false;
-          // let should_award_points_for_t_2 = false;
-          
-          // if ( (E_inflation_2 + previous_expected_error_t_2) > inflation || 
-          //      (E_inflation_2 - previous_expected_error_t_2) < inflation ) {
-          //   // score = 15 / (10+previous_expected_error_t_1+previous_expected_error_t_2)
-          //   // score = 15 / (10++previous_expected_error_t_2)
-          //   should_award_points_for_t_2 = true;
-          // }
-
-          // if ( should_award_points_for_t_1 && should_award_points_for_t_2 ) {
-          //   should_award_points_for_both = true;
-          // }
-
-          // if ( should_award_points_for_both ) {
-          //   score = 15 / (10+previous_expected_error_t_1+previous_expected_error_t_2);
-          // }
         }
 
         console.log('after everything, this is score>>>',score);
@@ -759,8 +746,8 @@ function handle_shock(msg) {
     if (min_group()) {
       r.send("summary", {
         subperiod: subperiod-1,
-        e_i: e_i,
-        e_o: e_o,
+        median_of_t_1: median_of_t_1,
+        median_of_t_2: median_of_t_2,
         shock: last_shock_size,
         shockarray: shockarray[subperiod-2],
         testershock: testershock,
@@ -768,7 +755,7 @@ function handle_shock(msg) {
         output: output,
         inflation: inflation,
         next_interest_rate: next_interest_rate,
-        old_x_change: old_x_change
+        // old_x_change: old_x_change
       });
     }
   }
