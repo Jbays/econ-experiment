@@ -161,9 +161,8 @@ var shockarray;
 
 //PRACTICE SEQUENCE:
 //CHANGE THE SHOCK ARRAY AND PERIOD 1 OF THE SHOCK_SERIES:
-shockarray = [8,83,-131,-29,-40,-146,-88,-299,-449,-410,-364,-361,-432,-208,-328,-172,5,3,14,-42,-218,-130,52,257,90,-162,-70,9,-25,-164];
-
-var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,8]];
+//shockarray = [8,83,-131,-29,-40,-146,-88,-299,-449,-410,-364,-361,-432,-208,-328,-172,5,3,14,-42,-218,-130,52,257,90,-162,-70,9,-25,-164];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,8]];
 
 //SHOCK SEQUENCE 1:
 //Sequence 1a:
@@ -218,8 +217,8 @@ var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,8]];
 //var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-70]];
 
 //Sequence 6b:
-//shockarray = [-82,-205,-150,-273,-158,-164,192,259,-180,-45,-209,-152,-65,61,-1,206,54,74,129,85,164,136,-25,-251,100,-22,1,74,57,-86];
-//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-82]];
+shockarray = [-82,-205,-150,-273,-158,-164,192,259,-180,-45,-209,-152,-65,61,-1,206,54,74,129,85,164,136,-25,-251,100,-22,1,74,57,-86];
+var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-82]];
 
 //Old output gap Change
 var old_x_change_series = [[-2, 0], [-1, 0], [0, 0]];
@@ -386,22 +385,22 @@ function replot() {
   opts.legend.container = "#plot1-legend"; // places the legend outside the plot, in the DOM
 
   $.plot($("#plot1"), [
-    { 
+    /*{ 
       data: inflation_fan,
       color: green,
       label: "Central Bank's Inflation Forecast",
       lines: {fillBetween: true}
-    },
+    },*/
     //NOTE: RHOLES: comment out below to disable the green fan
     //(EVERYTHING BETWEEN AND INCLUDING THE OPENING CURLY/CLOSING CURLY + COMMA)
     //has the key-value pair "data: inflation_fanfill"
-    {
+    /*{
       data: inflation_fanfill,
       color: green,
       lines: {show: true, lineWidth: 0, fill: 0.2},
       points: {show: false},
       hoverable: false
-    },
+    },*/
     {
       data: inflation_series,
       color: red,
@@ -423,19 +422,19 @@ function replot() {
 
   opts.legend.container = "#plot2-legend"
   $.plot($("#plot2"), [
-    { 
+    /*{ 
       data: inflation_fan,
       color: green,
       label: "Central Bank's Inflation Forecast",
       lines: {fillBetween: true}
-    },
-    {
+    },*/
+    /*{
       data: inflation_fanfill,
       color: green,
       lines: {show: true, lineWidth: 0, fill: 0.2},
       points: {show: false},
       hoverable: false
-    },
+    },*/
     {
       data: inflation_series,
       color: red,
@@ -690,6 +689,8 @@ function handle_shock(msg) {
           let previous_expected_error_t_1 = parseInt(expected_error_series_t1[expected_error_series_t1.length-1][1]);
           let previous_expected_error_t_2;
           // console.log('previous_expected_error_t_1',previous_expected_error_t_1)
+          // console.log('first E_inflation_2',E_inflation_2);
+          // console.log('E_inflation_2_from_three_periods_ago',E_inflation_2_from_three_periods_ago);
           
           if ( inflation_2_forecast_series.length > 2 ) {
             previous_expected_error_t_2 = parseInt(expected_error_series_t2[expected_error_series_t2.length-2][1]);
@@ -698,20 +699,41 @@ function handle_shock(msg) {
             // console.log('previous_expected_error_t_2',previous_expected_error_t_2);
             // console.log('E_inflation_2',E_inflation_2);
 
-            if ( (E_inflation_2 + previous_expected_error_t_2) > inflation || 
-                 (E_inflation_2 - previous_expected_error_t_2) < inflation ) {
+
+            if ( (E_inflation_2 + previous_expected_error_t_2) >= inflation && 
+                 (E_inflation_2 - previous_expected_error_t_2) <= inflation ) {
               score = 15 / (10+previous_expected_error_t_2)
             }
           }
           // console.log('score after t_2 calc',score)
           
-          if ( (E_inflation_1 + previous_expected_error_t_1) > inflation || 
-               (E_inflation_1 - previous_expected_error_t_1) < inflation ) {
+          if ( (E_inflation_1 + previous_expected_error_t_1) >= inflation && 
+               (E_inflation_1 - previous_expected_error_t_1) <= inflation ) {
             // let donut = 15 / (10+previous_expected_error_t_1);
             // console.log('donut after t_1 calc',donut)
             score += 15 / (10+previous_expected_error_t_1);
           }
+
+          // let should_award_points_for_t_1 = false;
+          // let should_award_points_for_t_2 = false;
+          
+          // if ( (E_inflation_2 + previous_expected_error_t_2) > inflation || 
+          //      (E_inflation_2 - previous_expected_error_t_2) < inflation ) {
+          //   // score = 15 / (10+previous_expected_error_t_1+previous_expected_error_t_2)
+          //   // score = 15 / (10++previous_expected_error_t_2)
+          //   should_award_points_for_t_2 = true;
+          // }
+
+          // if ( should_award_points_for_t_1 && should_award_points_for_t_2 ) {
+          //   should_award_points_for_both = true;
+          // }
+
+          // if ( should_award_points_for_both ) {
+          //   score = 15 / (10+previous_expected_error_t_1+previous_expected_error_t_2);
+          // }
         }
+
+        console.log('after everything, this is score>>>',score);
 
         r.set_points(r.points + score);
         r.send("points", score, {period: 0, group: 0, subperiod: subperiod});
