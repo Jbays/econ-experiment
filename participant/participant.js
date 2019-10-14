@@ -611,14 +611,18 @@ function handle_shock(msg) {
   if (all_forecasts_in()) {
     var inflation_forecasts = [];
     var output_forecasts = [];
+    console.log('forecasts',forecasts);
     for (var subject in forecasts) {
       if (forecasts[subject].inflation !== null && forecasts[subject].output !== null) {
         inflation_forecasts.push(forecasts[subject].inflation);
         output_forecasts.push(forecasts[subject].output);
       }
     }
-    console.log('inflation_1_forecast_series',inflation_1_forecast_series.toString());
-    console.log('inflation_2_forecast_series',inflation_2_forecast_series.toString());
+
+    console.log('inflation_forecasts.toString()',inflation_forecasts.toString());
+
+    // console.log('inflation_1_forecast_series',inflation_1_forecast_series.toString());
+    // console.log('inflation_2_forecast_series',inflation_2_forecast_series.toString());
     var median_of_t_1 = median(inflation_1_forecast_series); 
     var median_of_t_2 = median(inflation_2_forecast_series);
 
