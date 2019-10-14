@@ -48,11 +48,21 @@ function update_input_state_ticker() {
 }
 // returns the median of the given array
 function median(array) {
+  console.log('median invoked!');
+  console.log('medians array parameter>>>',array);
   a = [];
   for (var i = 0; i < array.length; i++) {
     a.push(parseInt(array[i], 10));
   }
   a.sort(function(a, b) { return a-b; });
+  console.log('array sorted>>>',array);
+  
+  if (a.length % 2 === 0) {
+    console.log('(a[a.length/2] + a[(a.length/2)-1]) / 2>>>',(a[a.length/2] + a[(a.length/2)-1]) / 2);
+  } else {
+    console.log('a[(a.length-1)/2]>>>',a[(a.length-1)/2]);
+  }
+
   if (a.length % 2 === 0) {
     return (a[a.length/2] + a[(a.length/2)-1]) / 2;
   } else {
@@ -671,7 +681,9 @@ inflationfour_forecasts.push(forecasts[subject].inflationfour);
         output_forecasts.push(forecasts[subject].output);
       }
     }
+    console.log('inflation_forecasts right before e_i',inflation_forecasts)
     var e_i = median(inflation_forecasts); 
+    console.log('e_i',e_i);
 var e_i_four = median(inflationfour_forecasts);
     var e_o = median(output_forecasts);
     
@@ -711,6 +723,7 @@ nextpistar_WR = Math.round(nextpistar_WR);
     output = Math.round(output);
     inflation = Math.round(inflation);
 
+    console.log('just before append e_i_series>>>>',e_i_series);
     
     append(e_i_series, e_i);
     append(e_o_series, e_o);
