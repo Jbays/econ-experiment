@@ -805,25 +805,33 @@ function finish_sync() {
         addClass('help-inline').
         text('Please input your expected error estimate');
       $('#expected_error_input_t1').after(help);
+    } else if ( expectedErrorT1[0] === '-' ) { 
+      $('#expected_error_input_t1').closest('.control-group').addClass('error');
+      help = $('<span>').
+        addClass('help-inline').
+        text('Expected error cannot be negative');
+      $('#expected_error_input_t1').after(help);
     } else {
       $("#expected_error_input_t1").closest(".control-group").removeClass("error");
     }
 
-    console.log('expectedErrorT1',expectedErrorT1)
-    
     let expectedErrorT2 = $("#expected_error_input_t2").val();
     if ( expectedErrorT2 === '' ) {
       $('#expected_error_input_t2').closest('.control-group').addClass('error');
       help = $('<span>').
-      addClass('help-inline').
-      text('Please input your expected error estimate');
+        addClass('help-inline').
+        text('Please input your expected error estimate');
+      $('#expected_error_input_t2').after(help);
+    } else if ( expectedErrorT2[0] === '-' ) { 
+      $('#expected_error_input_t2').closest('.control-group').addClass('error');
+      help = $('<span>').
+        addClass('help-inline').
+        text('Expected error cannot be negative');
       $('#expected_error_input_t2').after(help);
     } else {
       $("#expected_error_input_t2").closest(".control-group").removeClass("error");
     }
     
-    console.log('expectedErrorT2',expectedErrorT2)
-
     if (help === undefined) {
       $("input").attr("disabled", "disabled");
       $("#submit_input").attr("disabled", "disabled");
