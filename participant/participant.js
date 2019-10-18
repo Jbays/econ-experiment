@@ -46,15 +46,15 @@ function update_input_state_ticker() {
 }
 // returns the median of the given array
 function median(array) {
-  console.log('hello from median!');
-  console.log('this is array',array.toString());
+  // console.log('hello from median!');
+  // console.log('this is array',array.toString());
   a = [];
   for (var i = 0; i < array.length; i++) {
     a.push(parseInt(array[i], 10));
   }
   a.sort(function(a, b) { return a-b; });
 
-  console.log('a.length%2===0',a.length%2===0);
+  // console.log('a.length%2===0',a.length%2===0);
   if (a.length % 2 === 0) {
     return (a[a.length/2] + a[(a.length/2)-1]) / 2;
   } else {
@@ -560,8 +560,8 @@ function handle_forecast(msg) {
     append(inflation_2_forecast_series, msg.Value.inflation_2, 3);
 
     //here is where the expected_error is appended to the expected_error_series array.
-    append(expected_error_series_t1, msg.Value.expectedErrorT1);
-    append(expected_error_series_t2, msg.Value.expectedErrorT2);
+    append(expected_error_series_t1, Math.abs(msg.Value.expectedErrorT1).toString());
+    append(expected_error_series_t2, Math.abs(msg.Value.expectedErrorT2).toString());
     replot();
   }
   
@@ -611,7 +611,7 @@ function handle_shock(msg) {
   if (all_forecasts_in()) {
     let inflation_1_forecasts_for_all_players = [];
     let inflation_2_forecasts_for_all_players = [];
-    console.log('JSON.stringify(forecasts)',JSON.stringify(forecasts));
+    // console.log('JSON.stringify(forecasts)',JSON.stringify(forecasts));
 
     for (let subject in forecasts) {
       if (forecasts[subject].inflation_1 !== null && forecasts[subject].inflation_2 !== null) {
@@ -621,16 +621,16 @@ function handle_shock(msg) {
       }
     }
 
-    console.log('inflation_1_forecasts_for_all_players.toString()',inflation_1_forecasts_for_all_players.toString());
-    console.log('inflation_2_forecasts_for_all_players.toString()',inflation_2_forecasts_for_all_players.toString());
+    // console.log('inflation_1_forecasts_for_all_players.toString()',inflation_1_forecasts_for_all_players.toString());
+    // console.log('inflation_2_forecasts_for_all_players.toString()',inflation_2_forecasts_for_all_players.toString());
 
     // console.log('inflation_1_forecast_series',inflation_1_forecast_series.toString());
     // console.log('inflation_2_forecast_series',inflation_2_forecast_series.toString());
     var median_of_t_1 = median(inflation_1_forecasts_for_all_players); 
     var median_of_t_2 = median(inflation_2_forecasts_for_all_players);
 
-    console.log('this is median_of_t_1',median_of_t_1);
-    console.log('this is median_of_t_2',median_of_t_2);
+    // console.log('this is median_of_t_1',median_of_t_1);
+    // console.log('this is median_of_t_2',median_of_t_2);
     
     // var last_inflation = inflation_series[inflation_series.length - 1][1];
     var last_output = output_series[output_series.length - 1][1];
@@ -648,7 +648,6 @@ function handle_shock(msg) {
                  (r.config.rholes_gamma_one * (r.config.rholes_sigma**-1) * testershock);
     
     var interest_rate =  (r.config.rholes_phipi*inflation) + (r.config.rholes_phix*output);
-
 
     interest_rate = Math.round(interest_rate);
     output = Math.round(output);
@@ -678,6 +677,8 @@ function handle_shock(msg) {
         let E_inflation_1 = parseInt(one_previous_forecast[r.username].inflation_1, 10);
         let E_inflation_2;
         let E_inflation_2_from_three_periods_ago;
+
+        console.log('expected_error_series_t1',expected_error_series_t1.toString());
         
         //participant gets scored either on their inflation prediction OR their expected error on said prediction.
         //should be 50/50.
@@ -703,6 +704,9 @@ function handle_shock(msg) {
           
           //take the expected error from the previous period
           let previous_expected_error_t_1 = parseInt(expected_error_series_t1[expected_error_series_t1.length-1][1]);
+          console.log('scoring for error bands');
+          console.log('expected_error_series_t1',expected_error_series_t1.toString());
+
           let previous_expected_error_t_2;
           // console.log('previous_expected_error_t_1',previous_expected_error_t_1)
           // console.log('first E_inflation_2',E_inflation_2);
@@ -824,7 +828,7 @@ function finish_sync() {
 
     let expectedErrorT1 = $("#expected_error_input_t1").val();
     if ( expectedErrorT1 === '' ) {
-      $('#expected_error_input_t1').closest('.control-group').add('error');
+      $('#expected_error_input_t1').closest('.control-group').addClass('error');
       help = $('<span>').
         addClass('help-inline').
         text('Please input your expected error estimate');
@@ -835,7 +839,7 @@ function finish_sync() {
 
     let expectedErrorT2 = $("#expected_error_input_t2").val();
     if ( expectedErrorT2 === '' ) {
-      $('#expected_error_input_t2').closest('.control-group').add('error');
+      $('#expected_error_input_t2').closest('.control-group').addClass('error');
       help = $('<span>').
         addClass('help-inline').
         text('Please input your expected error estimate');
