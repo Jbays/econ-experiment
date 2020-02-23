@@ -162,8 +162,8 @@ var shockarray;
 
 //PRACTICE SEQUENCE:
 //CHANGE THE SHOCK ARRAY AND PERIOD 1 OF THE SHOCK_SERIES:
-//shockarray = [8,83,-131,-29,-40,-146,-88,-299,-449,-410,-364,-361,-432,-208,-328,-172,5,3,14,-42,-218,-130,52,257,90,-162,-70,9,-25,-164];
-//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,8]];
+shockarray = [8,83,-131,-29,-40,-146,-88,-299,-449,-410,-364,-361,-432,-208,-328,-172,5,3,14,-42,-218,-130,52,257,90,-162,-70,9,-25,-164];
+var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,8]];
 
 //SHOCK SEQUENCE 1:
 //Sequence 1a:
@@ -202,7 +202,6 @@ var shockarray;
 //shockarray = [-143,-77,28,160,294,179,-94,-151,-225,180,22,110,38,138,-22,-196,-298,-106,-84,-73,144,120,95,262,44,116,176,68,67,-114];
 //var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-143]];
 
-
 //SHOCK SEQUENCE 4:
 //Sequence 4a:
 //shockarray = [112,-179,-129,-38,-107,1,-9,-128,-52,-65,-91,-145,-74,-284,-214,-193,-230,-45,-122,1,129,53,66,122,59,104,-106,85,-81,-286];
@@ -218,8 +217,8 @@ var shockarray;
 //var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-70]];
 
 //Sequence 6b:
-shockarray = [-82,-205,-150,-273,-158,-164,192,259,-180,-45,-209,-152,-65,61,-1,206,54,74,129,85,164,136,-25,-251,100,-22,1,74,57,-86];
-var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-82]];
+//shockarray = [-82,-205,-150,-273,-158,-164,192,259,-180,-45,-209,-152,-65,61,-1,206,54,74,129,85,164,136,-25,-251,100,-22,1,74,57,-86];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,-82]];
 
 //Old output gap Change
 var old_x_change_series = [[-2, 0], [-1, 0], [0, 0]];
@@ -386,16 +385,16 @@ function replot() {
   opts.legend.container = "#plot1-legend"; // places the legend outside the plot, in the DOM
 
   $.plot($("#plot1"), [
-    /*{ 
+   /* { 
       data: inflation_fan,
       color: green,
       label: "Central Bank's Inflation Forecast",
       lines: {fillBetween: true}
-    },*/
+    },
     //NOTE: RHOLES: comment out below to disable the green fan
     //(EVERYTHING BETWEEN AND INCLUDING THE OPENING CURLY/CLOSING CURLY + COMMA)
     //has the key-value pair "data: inflation_fanfill"
-    /*{
+    {
       data: inflation_fanfill,
       color: green,
       lines: {show: true, lineWidth: 0, fill: 0.2},
@@ -423,13 +422,13 @@ function replot() {
 
   opts.legend.container = "#plot2-legend"
   $.plot($("#plot2"), [
-    /*{ 
+  /*  { 
       data: inflation_fan,
       color: green,
       label: "Central Bank's Inflation Forecast",
       lines: {fillBetween: true}
-    },*/
-    /*{
+    },
+    {
       data: inflation_fanfill,
       color: green,
       lines: {show: true, lineWidth: 0, fill: 0.2},
