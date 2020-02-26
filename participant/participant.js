@@ -528,8 +528,6 @@ function setup_tooltip() {
 
 let two_previous_forecast = {};
 let one_previous_forecast = {};
-console.log('two_previous_forecast',two_previous_forecast);
-console.log('one_previous_forecast',one_previous_forecast);
 var forecasts = {};
 
 // returns true iff all subjects in group have sent in a forecast
@@ -549,14 +547,15 @@ function handle_forecast(msg) {
     $("input").attr("disabled", "disabled");
     $("#submit_input").attr("disabled", "disabled");
     $(".input-state").text("Please wait for group to finish...");
-    console.log('this is msg.Value.inflation_1>>>>',msg.Value.inflation_1);
-    $("#inflation_expectation_input").val(parseFloat(msg.Value.inflation_1).toFixed(0));
-    $("#inflation_2_input").val(parseFloat(msg.Value.inflation_2).toFixed(0));
+    console.log('this is msg.Value.inflation_expectation>>>>',msg.Value.inflation_expectation);
+    console.log('this is msg.Value.output_expectation>>>>',msg.Value.output_expectation);
+    $("#inflation_expectation_input").val(parseFloat(msg.Value.inflation_expectation).toFixed(0));
+    $("#output_expectation_input").val(parseFloat(msg.Value.output_expectation).toFixed(0));
     // $("#expected_error_input_t1").val(parseFloat(msg.Value.expectedErrorT1).toFixed(0));
     // $("#expected_error_input_t2").val(parseFloat(msg.Value.expectedErrorT2).toFixed(0));
     $("form p").text("Please wait for others to submit their forecasts.");
-    append(inflation_1_forecast_series, msg.Value.inflation_1, 2);
-    append(inflation_2_forecast_series, msg.Value.inflation_2, 3);
+    append(inflation_1_forecast_series, msg.Value.inflation_expectation, 2);
+    append(inflation_2_forecast_series, msg.Value.output_expectation, 3);
 
     //here is where the expected_error is appended to the expected_error_series array.
     // append(expected_error_series_t1, Math.abs(msg.Value.expectedErrorT1).toString());
@@ -568,7 +567,7 @@ function handle_forecast(msg) {
   if (all_forecasts_in()) {
     console.log('all_forecasts_in called!');
     $("#inflation_expectation_input").val("");
-    $("#inflation_2_input").val("");
+    $("#output_expectation_input").val("");
     // $("#expected_error_input_t1").val("");
     // $("#expected_error_input_t2").val("");
     var subperiod = $(".period").text();
@@ -613,10 +612,10 @@ function handle_shock(msg) {
     let inflation_2_forecasts_for_all_players = [];
 
     for (let subject in forecasts) {
-      if (forecasts[subject].inflation_1 !== null && forecasts[subject].inflation_2 !== null) {
+      if (forecasts[subject].inflation_expectation !== null && forecasts[subject].output_expectation !== null) {
         //these variables were mislabeled.  should be inflation_1 and inflation_2 for inflation and output (respectively)
-        inflation_1_forecasts_for_all_players.push(forecasts[subject].inflation_1);
-        inflation_2_forecasts_for_all_players.push(forecasts[subject].inflation_2);
+        inflation_1_forecasts_for_all_players.push(forecasts[subject].inflation_expectation);
+        inflation_2_forecasts_for_all_players.push(forecasts[subject].output_expectation);
       }
     }
 
@@ -764,7 +763,7 @@ function handle_shock(msg) {
       robot = setTimeout(function() {
         // var inflation = rand.uniform(40, -50); 
         // var output = rand.uniform(40, -50); 
-        r.send("forecast", { subperiod: subperiod, inflation_1: inflation_1, inflation_2: inflation_2 });
+        r.send("forecast", { subperiod: subperiod, inflation_expectation: inflation_expectation, output_expectation: output_expectation });
         r.send("progress", { period: r.period, subperiod: subperiod, forecast: true}, {period: 0, group: 0});
       }, Math.round(1000 + Math.random() * 3000));
     }
@@ -786,9 +785,10 @@ function finish_sync() {
 
   $("#submit_input").click(function() {
     var help;
-    var inflation_1 = $("#inflation_expectation_input").val();
+    //change the name of inflation_1 to inflation_expectation
+    var inflation_expectation = $("#inflation_expectation_input").val();
     $(".help-inline").remove();
-    if (inflation_1 === "") {
+    if (inflation_expectation === "") {
       $("#inflation_expectation_input").closest(".control-group").addClass("error");
       help = $("<span>").
         addClass("help-inline").
@@ -798,15 +798,16 @@ function finish_sync() {
       $("#inflation_expectation_input").closest(".control-group").removeClass("error");
     }
 
-    var inflation_2 = $("#inflation_2_input").val();
-    if (inflation_2 === "") {
-      $("#inflation_2_input").closest(".control-group").addClass("error");
+    //change name of inflation_2 to output_expectation
+    var output_expectation = $("#output_expectation_input").val();
+    if (output_expectation === "") {
+      $("#output_expectation_input").closest(".control-group").addClass("error");
       help = $("<span>").
         addClass("help-inline").
-        text("Please input your inflation @ t+2 estimate");
-      $("#inflation_2_input").after(help);
+        text("Please input your output @ t+1 estimate");
+      $("#output_expectation_input").after(help);
     } else {
-      $("#inflation_2_input").closest(".control-group").removeClass("error");
+      $("#output_expectation_input").closest(".control-group").removeClass("error");
     }
 
     // let expectedErrorT1 = $("#expected_error_input_t1").val();
@@ -851,8 +852,8 @@ function finish_sync() {
       
       r.send("forecast", { 
         subperiod: subperiod, 
-        inflation_1: inflation_1, 
-        inflation_2: inflation_2 
+        inflation_expectation: inflation_expectation, 
+        output_expectation: output_expectation 
       });
       
       // original to code above ^^
@@ -927,7 +928,7 @@ function finish_sync() {
       $(".time_remaining").text("Time Remaining: 0");
       $(".time_remaining,.prompt").toggleClass("red");
       if (r.config.block === false && secondsLeft <= -5) {
-        r.send("forecast", { inflation_1: NaN, inflation_2: NaN });
+        r.send("forecast", { inflation_expectation: NaN, output_expectation: NaN });
         var subperiod = parseInt($(".period").text(), 10);
         r.send("progress", {period: r.period, subperiod: subperiod, forecast: true}, {period: 0, group: 0});
       }
@@ -945,7 +946,7 @@ function finish_sync() {
       robot = setTimeout(function() {
         // var inflation = last_inflation;
         // var output = last_output;
-        r.send("forecast", { inflation_1: inflation_1, inflation_2: inflation_2 });
+        r.send("forecast", { inflation_expectation: inflation_expectation, output_expectation: output_expectation });
         var subperiod = parseInt($(".period").text(), 10);
         r.send("progress", {period: r.period, subperiod: subperiod, forecast: true}, {period: 0, group: 0});
       }, Math.round(1000 + Math.random() * 10000));
