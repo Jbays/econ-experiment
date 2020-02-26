@@ -664,59 +664,66 @@ function handle_shock(msg) {
         $(".last_score").text("0");
       } else {
         console.log('begin calculating the score');
-        let score = 0;
-        let randomNumber = Math.random();
         
-        let E_inflation_1 = parseInt(one_previous_forecast[r.username].inflation_1, 10);
-        let E_inflation_2;
-        let E_inflation_2_from_three_periods_ago;
-
-        //participant gets scored either on their inflation prediction OR their expected error on said prediction.
+        /** THIS PART OF THE CODE DID THREE THINGS:
+         * 1. CALCULATED THE SCORE
+         * 2. SENT THE SCORE TO THE SERVER 
+         * 3. UPDATED TEXT FIELDS IN THE UI
+         * 
+         * let score = 0;
+         * let randomNumber = Math.random();
+         *
+         * let E_inflation_1 = parseInt(one_previous_forecast[r.username].inflation_1, 10);
+         * let E_inflation_2;
+         * let E_inflation_2_from_three_periods_ago;
+         * 
+         * participant gets scored either on their inflation prediction OR their expected error on said prediction.
         //should be 50/50.
-        if ( randomNumber < 0.5 ) {
-          //score their inflation prediction
+        // if ( randomNumber < 0.5 ) {
+        //   //score their inflation prediction
           
-          //if the third period or after
-          if ( inflation_2_forecast_series.length > 2 ) {
-            E_inflation_2_from_three_periods_ago = inflation_2_forecast_series[inflation_2_forecast_series.length-3][1];
-            E_inflation_2 = parseInt(E_inflation_2_from_three_periods_ago, 10);
+        //   //if the third period or after
+        //   if ( inflation_2_forecast_series.length > 2 ) {
+        //     E_inflation_2_from_three_periods_ago = inflation_2_forecast_series[inflation_2_forecast_series.length-3][1];
+        //     E_inflation_2 = parseInt(E_inflation_2_from_three_periods_ago, 10);
   
-            //score equals the accuracy of their predictions for the inflation at t+1, t+2,
-            score =
-              r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_1 - inflation)) +
-              r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_2 - inflation));
-          } else {
-            //score equals the accuracy of their predictions for the inflation at t+1
-            score = r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_1 - inflation));
-          }
-        } else {
-          //take the expected error from the previous period
-          let previous_expected_error_t_1 = parseInt(expected_error_series_t1[expected_error_series_t1.length-1][1]);
-          let previous_expected_error_t_2;
+        //     //score equals the accuracy of their predictions for the inflation at t+1, t+2,
+        //     score =
+        //       r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_1 - inflation)) +
+        //       r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_2 - inflation));
+        //   } else {
+        //     //score equals the accuracy of their predictions for the inflation at t+1
+        //     score = r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_1 - inflation));
+        //   }
+        // } else {
+        //   //take the expected error from the previous period
+        //   let previous_expected_error_t_1 = parseInt(expected_error_series_t1[expected_error_series_t1.length-1][1]);
+        //   let previous_expected_error_t_2;
           
-          if ( inflation_2_forecast_series.length > 2 ) {
-            previous_expected_error_t_2 = parseInt(expected_error_series_t2[expected_error_series_t2.length-2][1]);
-            E_inflation_2_from_three_periods_ago = inflation_2_forecast_series[inflation_2_forecast_series.length-3][1];
-            E_inflation_2 = parseInt(E_inflation_2_from_three_periods_ago, 10);
+        //   if ( inflation_2_forecast_series.length > 2 ) {
+        //     previous_expected_error_t_2 = parseInt(expected_error_series_t2[expected_error_series_t2.length-2][1]);
+        //     E_inflation_2_from_three_periods_ago = inflation_2_forecast_series[inflation_2_forecast_series.length-3][1];
+        //     E_inflation_2 = parseInt(E_inflation_2_from_three_periods_ago, 10);
 
-            if ( (E_inflation_2 + previous_expected_error_t_2) >= inflation && 
-                 (E_inflation_2 - previous_expected_error_t_2) <= inflation ) {
-              score = 15 / (10+previous_expected_error_t_2)
-            }
-          }
+        //     if ( (E_inflation_2 + previous_expected_error_t_2) >= inflation && 
+        //          (E_inflation_2 - previous_expected_error_t_2) <= inflation ) {
+        //       score = 15 / (10+previous_expected_error_t_2)
+        //     }
+        //   }
           
-          if ( (E_inflation_1 + previous_expected_error_t_1) >= inflation && 
-               (E_inflation_1 - previous_expected_error_t_1) <= inflation ) {
-            score += 15 / (10+previous_expected_error_t_1);
-          }
-        }
+        //   if ( (E_inflation_1 + previous_expected_error_t_1) >= inflation && 
+        //        (E_inflation_1 - previous_expected_error_t_1) <= inflation ) {
+        //     score += 15 / (10+previous_expected_error_t_1);
+        //   }
+        // }
 
-        r.set_points(r.points + score);
-        r.send("points", score, {period: 0, group: 0, subperiod: subperiod});
+        // r.set_points(r.points + score);
+        // r.send("points", score, {period: 0, group: 0, subperiod: subperiod});
 
-        $(".last_inflation_forecast").text(E_inflation_1.toFixed(0));
-        $(".last_inflation_forecast_error").text(Math.abs(E_inflation_1 - inflation).toFixed(0));
-        $(".last_score").text(score.toFixed(2));
+        // $(".last_inflation_forecast").text(E_inflation_1.toFixed(0));
+        // $(".last_inflation_forecast_error").text(Math.abs(E_inflation_1 - inflation).toFixed(0));
+        // $(".last_score").text(score.toFixed(2));
+        */
       }
     }
     
