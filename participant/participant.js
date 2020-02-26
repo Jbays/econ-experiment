@@ -247,154 +247,9 @@ function replot() {
   var green = "#00ff00";
   var orange = "#FFA500";
   
-  // the interest fan plot, yes, this is recomputed every time we replot
-  var interest_fan = [];
-  var interest_fanfill = [];
-  for (var i in interest_rate_series) {
-    if (interest_rate_series[i][0] >= 0) {
-      interest_fan.push(interest_rate_series[i]);
-    }
-  }
-  var t = shock_series[shock_series.length-1][0];
-  var r_t = shock_series[shock_series.length-1] [1];
-  for (var n = 1; n <= r.config.forecast_length; n++) {
-    var r_tn = r.config.dide *Math.pow(r.config.p, n-1) * r_t;
-    interest_fan.push([t+n, r_tn]);
-    var stddev = r.config.shock_stddev * Math.sqrt(n);
-    interest_fanfill.push([t+n, r_tn + stddev, r_tn - stddev]);
-  }
-
-  $.plot($("#fanplot"), [
-    {
-      data: interest_fan,
-      color: red,
-      label: "Interest Rate Forecast",
-      lines: {fillBetween: true}
-    },
-    {
-      data: interest_fanfill,
-      color: red,
-      lines: {show: true, lineWidth: 0, fill: 0.2},
-      points: {show: false},
-      hoverable: false
-    }
-  ], opts);
-  
-  // the inflation fan plot
-  var inflation_fan = [];
-  var inflation_fanfill = [];
-
-  //this loop pushes the last inflation into the green dots array
-  //aka --> pushes red dots into the green dots array
-  for (var ii in inflation_series) {
-    //if its the zeroth period or after
-    if (inflation_series[ii][0] >= 0) {
-      inflation_fan.push(inflation_series[ii]);
-    }
-  }
-
-  //here is where the inflation_fanfill is calculated
-  var tt = shock_series[shock_series.length-1][0];
-  var pi_t = shock_series[shock_series.length-1][1];
-  //this also pushes green dots representing forecast (future times)
-  for (var nn = 1; nn <= r.config.forecast_length; nn++) {
-    var pi_tn = r.config.dpide*Math.pow(r.config.p, nn-1) * pi_t;
-    inflation_fan.push([tt+nn, pi_tn]);
-    var pi_stddev = r.config.shock_stddev * Math.sqrt(nn);
-    inflation_fanfill.push([tt+nn, pi_tn + pi_stddev, pi_tn - pi_stddev]);
-  }
-  
-  //duplicate fanfill dots in reverse order
-  let extraPointsForFanFill = inflation_fanfill.map((elem)=>{
-    return [elem[0],elem[2],elem[1]];
-  }).reverse();
-  
-  //SHOULD NOT TRUNCATE THE BOTTOM PART OF THE INFLATION FANFILL
-  inflation_fanfill.push(...extraPointsForFanFill);
-
-  // //create fanfill w/correct values from expected_error_t+1
-  // let fanFillForErrorSeriesT1 = expected_error_series_t1.map((elem)=>{
-  //   let inflationPredictionT1 = parseInt(inflation_expectation_forecast_series[elem[0]][1]);
-  //   let expectedErrorT1 = Math.abs(parseInt(elem[1]));
-  //   return [elem[0]+2,expectedErrorT1+inflationPredictionT1,(expectedErrorT1*-1)+inflationPredictionT1];
-  // })
-  
-  // //create fanfill w/correct values from expected_error_t+2
-  // let fanFillForErrorSeriesT2 = expected_error_series_t2.map((elem)=>{
-  //   let inflationPredictionT2 = parseInt(output_expectation_forecast_series[elem[0]][1]);
-  //   let expectedErrorT2 = Math.abs(parseInt(elem[1]));
-  //   return [elem[0]+3,expectedErrorT2+inflationPredictionT2,(expectedErrorT2*-1)+inflationPredictionT2];
-  // })
-  
-  //The output fan plot
-  var output_fan = [];
-  var output_fanfill = [];
-  for (var iii in output_series) {
-    if (output_series[iii][0] >= 0) {
-      output_fan.push(output_series[iii]);
-    }
-  }
-  var tx = shock_series[shock_series.length-1][0];
-  var shock_t = shock_series[shock_series.length-1] [1];
-  var x_t1 = output_series[output_series.length-1] [1];
-  var pi_t1 = inflation_series[inflation_series.length-1] [1];
-  var shock_t1 = shock_series[shock_series.length-2] [1];
-
-  for (var nx = 1; nx <= r.config.forecast_length; nx++) {
-    if(nx==1){  
-      var x_tn =  r.config.AX1*shock_t1 +r.config.BX1*x_t1 + r.config.CX1*pi_t1 + r.config.DX1*(shock_t-r.config.p*shock_t1);
-    }
-    if(nx==2){  
-      var x_tn =  r.config.AX2*shock_t1 +r.config.BX2*x_t1 + r.config.CX2*pi_t1 + r.config.DX2*(shock_t-r.config.p*shock_t1);
-    }
-    if(nx==3){  
-      var x_tn = r.config.AX3*shock_t1 +r.config.BX3*x_t1 + r.config.CX3*pi_t1 + r.config.DX3*(shock_t-r.config.p*shock_t1);
-    }
-    if(nx==4){  
-      var x_tn = r.config.AX4*shock_t1 +r.config.BX4*x_t1 + r.config.CX4*pi_t1 + r.config.DX4*(shock_t-r.config.p*shock_t1);
-    }
-    if(nx==5){  
-      var x_tn = r.config.AX5*shock_t1 +r.config.BX5*x_t1 + r.config.CX5*pi_t1 + r.config.DX5*(shock_t-r.config.p*shock_t1);
-    }
-    output_fan.push([tx+nx, x_tn]);
-    var x_stddev = r.config.shock_stddev * Math.sqrt(nx);
-    output_fanfill.push([tx+nx, x_tn + x_stddev, x_tn - x_stddev]);
-  }
-
-  $.plot($("#fanplot"), [
-    {
-      data: output_fan,
-      color: red,
-      label: "Inflation Forecast",
-      lines: {fillBetween: true}
-    },
-    {
-      data: output_fanfill,
-      color: red,
-      lines: {show: true, lineWidth: 0, fill: 0.2},
-      points: {show: false},
-      hoverable: false
-    }
-  ], opts);
   opts.legend.container = "#plot1-legend"; // places the legend outside the plot, in the DOM
 
   $.plot($("#plot1"), [
-   /* { 
-      data: inflation_fan,
-      color: green,
-      label: "Central Bank's Inflation Forecast",
-      lines: {fillBetween: true}
-    },
-    //NOTE: RHOLES: comment out below to disable the green fan
-    //(EVERYTHING BETWEEN AND INCLUDING THE OPENING CURLY/CLOSING CURLY + COMMA)
-    //has the key-value pair "data: inflation_fanfill"
-    {
-      data: inflation_fanfill,
-      color: green,
-      lines: {show: true, lineWidth: 0, fill: 0.2},
-      points: {show: false},
-      hoverable: false
-    },*/
     {
       data: inflation_series,
       color: red,
@@ -405,31 +260,10 @@ function replot() {
       color: blue,
       label: "Inflation Forecast @ period+1 (Π@t+1)"
     },
-    // {
-    //   data: fanFillForErrorSeriesT1,
-    //   color: blue,
-    //   lines: {show: true, lineWidth: 0, fill: 0.2},
-    //   points: {show: false},
-    //   hoverable: false
-    // },
   ], opts);
 
   opts.legend.container = "#plot2-legend"
   $.plot($("#plot2"), [
-  /*  { 
-      data: inflation_fan,
-      color: green,
-      label: "Central Bank's Inflation Forecast",
-      lines: {fillBetween: true}
-    },
-    {
-      data: inflation_fanfill,
-      color: green,
-      lines: {show: true, lineWidth: 0, fill: 0.2},
-      points: {show: false},
-      hoverable: false
-    },*/
-    
     //NOTE: currently this is graphinig inflation
     //but actually this graph should represent the output
     {
@@ -442,13 +276,6 @@ function replot() {
       color: orange,
       label: "Output Forecast @ period+1 (X@t+2)"
     },
-    // {
-    //   data: fanFillForErrorSeriesT2,
-    //   color: orange,
-    //   lines: {show: true, lineWidth: 0, fill: 0.2},
-    //   points: {show: false},
-    //   hoverable: false
-    // },
   ], opts);
 
   opts.legend.container = "#plot3-legend";
@@ -549,10 +376,6 @@ function handle_forecast(msg) {
     $("form p").text("Please wait for others to submit their forecasts.");
     append(inflation_expectation_forecast_series, msg.Value.inflation_expectation, 2);
     append(output_expectation_forecast_series, msg.Value.output_expectation, 2);
-
-    //here is where the expected_error is appended to the expected_error_series array.
-    // // append(expected_error_series_t1, Math.abs(msg.Value.expectedErrorT1).toString());
-    // // append(expected_error_series_t2, Math.abs(msg.Value.expectedErrorT2).toString());
     replot();
   }
   
@@ -561,8 +384,6 @@ function handle_forecast(msg) {
     console.log('all_forecasts_in called!');
     $("#inflation_expectation_input").val("");
     $("#output_expectation_input").val("");
-    // $("#expected_error_input_t1").val("");
-    // $("#expected_error_input_t2").val("");
     var subperiod = $(".period").text();
     if (subperiod === "") {
       subperiod = 0;
@@ -614,7 +435,6 @@ function handle_shock(msg) {
 
     var median_of_t_1 = median(inflation_1_forecasts_for_all_players); 
     var median_of_t_2 = median(inflation_2_forecasts_for_all_players);
-
     
     // var last_inflation = inflation_series[inflation_series.length - 1][1];
     var last_output = output_series[output_series.length - 1][1];
@@ -913,9 +733,6 @@ function finish_sync() {
   }
   if (r.config.hide_previous) {
     $(".previous").addClass("invisible");
-  }
-  if (r.config.hide_ir_chart) {
-    $("#fanplot").addClass("invisible");
   }
 }
 
