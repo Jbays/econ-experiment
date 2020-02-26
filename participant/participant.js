@@ -130,10 +130,6 @@ function showTooltip(x, y, contents) {
   }).appendTo("body").fadeIn(200);
 }
 
-//expected error series
-let expected_error_series_t1 = [];
-let expected_error_series_t2 = [];
-
 // Expected inflation
 var e_i_series = [[0, 0]];
 // Expected output
@@ -142,12 +138,10 @@ var e_o_series = [[0, 0]];
 var inflation_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0, 0]];
 
 // var inflation_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0, 0],[1,10],[2,30],[3,-20],[4,-10],[5,40]];
-// Personal (our) inflation forecast
-var inflation_1_forecast_series = [];
-// Personal (our) output forecast
-var inflation_2_forecast_series = [];
-
-// var inflationfour_forecast_series = [];
+// Participant's inflation forecast
+let inflation_expectation_forecast_series = [];
+// Participant's output forecast
+let output_expectation_forecast_series = [];
 
 // Actual (realized) output
 var output_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0, 0]];
@@ -320,14 +314,14 @@ function replot() {
 
   // //create fanfill w/correct values from expected_error_t+1
   // let fanFillForErrorSeriesT1 = expected_error_series_t1.map((elem)=>{
-  //   let inflationPredictionT1 = parseInt(inflation_1_forecast_series[elem[0]][1]);
+  //   let inflationPredictionT1 = parseInt(inflation_expectation_forecast_series[elem[0]][1]);
   //   let expectedErrorT1 = Math.abs(parseInt(elem[1]));
   //   return [elem[0]+2,expectedErrorT1+inflationPredictionT1,(expectedErrorT1*-1)+inflationPredictionT1];
   // })
   
   // //create fanfill w/correct values from expected_error_t+2
   // let fanFillForErrorSeriesT2 = expected_error_series_t2.map((elem)=>{
-  //   let inflationPredictionT2 = parseInt(inflation_2_forecast_series[elem[0]][1]);
+  //   let inflationPredictionT2 = parseInt(output_expectation_forecast_series[elem[0]][1]);
   //   let expectedErrorT2 = Math.abs(parseInt(elem[1]));
   //   return [elem[0]+3,expectedErrorT2+inflationPredictionT2,(expectedErrorT2*-1)+inflationPredictionT2];
   // })
@@ -407,7 +401,7 @@ function replot() {
       label: "Inflation"
     },
     {
-      data: inflation_1_forecast_series,
+      data: inflation_expectation_forecast_series,
       color: blue,
       label: "Inflation Forecast @ period+1 (Π@t+1)"
     },
@@ -435,15 +429,18 @@ function replot() {
       points: {show: false},
       hoverable: false
     },*/
+    
+    //NOTE: currently this is graphinig inflation
+    //but actually this graph should represent the output
     {
-      data: inflation_series,
+      data: output_series,
       color: red,
-      label: "Inflation"
+      label: "output"
     },
     {
-      data: inflation_2_forecast_series,
+      data: output_expectation_forecast_series,
       color: orange,
-      label: "Inflation Forecast @ period+2 (Π@t+2)"
+      label: "Output Forecast @ period+1 (X@t+2)"
     },
     // {
     //   data: fanFillForErrorSeriesT2,
@@ -547,19 +544,15 @@ function handle_forecast(msg) {
     $("input").attr("disabled", "disabled");
     $("#submit_input").attr("disabled", "disabled");
     $(".input-state").text("Please wait for group to finish...");
-    console.log('this is msg.Value.inflation_expectation>>>>',msg.Value.inflation_expectation);
-    console.log('this is msg.Value.output_expectation>>>>',msg.Value.output_expectation);
     $("#inflation_expectation_input").val(parseFloat(msg.Value.inflation_expectation).toFixed(0));
     $("#output_expectation_input").val(parseFloat(msg.Value.output_expectation).toFixed(0));
-    // $("#expected_error_input_t1").val(parseFloat(msg.Value.expectedErrorT1).toFixed(0));
-    // $("#expected_error_input_t2").val(parseFloat(msg.Value.expectedErrorT2).toFixed(0));
     $("form p").text("Please wait for others to submit their forecasts.");
-    append(inflation_1_forecast_series, msg.Value.inflation_expectation, 2);
-    append(inflation_2_forecast_series, msg.Value.output_expectation, 3);
+    append(inflation_expectation_forecast_series, msg.Value.inflation_expectation, 2);
+    append(output_expectation_forecast_series, msg.Value.output_expectation, 2);
 
     //here is where the expected_error is appended to the expected_error_series array.
-    // append(expected_error_series_t1, Math.abs(msg.Value.expectedErrorT1).toString());
-    // append(expected_error_series_t2, Math.abs(msg.Value.expectedErrorT2).toString());
+    // // append(expected_error_series_t1, Math.abs(msg.Value.expectedErrorT1).toString());
+    // // append(expected_error_series_t2, Math.abs(msg.Value.expectedErrorT2).toString());
     replot();
   }
   
@@ -682,8 +675,8 @@ function handle_shock(msg) {
         //   //score their inflation prediction
           
         //   //if the third period or after
-        //   if ( inflation_2_forecast_series.length > 2 ) {
-        //     E_inflation_2_from_three_periods_ago = inflation_2_forecast_series[inflation_2_forecast_series.length-3][1];
+        //   if ( output_expectation_forecast_series.length > 2 ) {
+        //     E_inflation_2_from_three_periods_ago = output_expectation_forecast_series[output_expectation_forecast_series.length-3][1];
         //     E_inflation_2 = parseInt(E_inflation_2_from_three_periods_ago, 10);
   
         //     //score equals the accuracy of their predictions for the inflation at t+1, t+2,
@@ -696,12 +689,12 @@ function handle_shock(msg) {
         //   }
         // } else {
         //   //take the expected error from the previous period
-        //   let previous_expected_error_t_1 = parseInt(expected_error_series_t1[expected_error_series_t1.length-1][1]);
-        //   let previous_expected_error_t_2;
+          let previous_expected_error_t_1 = parseInt(expected_error_series_t1[expected_error_series_t1.length-1][1]);
+          let previous_expected_error_t_2;
           
-        //   if ( inflation_2_forecast_series.length > 2 ) {
+        //   if ( output_expectation_forecast_series.length > 2 ) {
         //     previous_expected_error_t_2 = parseInt(expected_error_series_t2[expected_error_series_t2.length-2][1]);
-        //     E_inflation_2_from_three_periods_ago = inflation_2_forecast_series[inflation_2_forecast_series.length-3][1];
+        //     E_inflation_2_from_three_periods_ago = output_expectation_forecast_series[output_expectation_forecast_series.length-3][1];
         //     E_inflation_2 = parseInt(E_inflation_2_from_three_periods_ago, 10);
 
         //     if ( (E_inflation_2 + previous_expected_error_t_2) >= inflation && 
@@ -785,64 +778,30 @@ function finish_sync() {
 
   $("#submit_input").click(function() {
     var help;
-    //change the name of inflation_1 to inflation_expectation
+
     var inflation_expectation = $("#inflation_expectation_input").val();
     $(".help-inline").remove();
     if (inflation_expectation === "") {
       $("#inflation_expectation_input").closest(".control-group").addClass("error");
       help = $("<span>").
         addClass("help-inline").
-        text("Please input your inflation @ t+1 estimate");
+          text("Please input your inflation estimate");
       $("#inflation_expectation_input").after(help);
     } else {
       $("#inflation_expectation_input").closest(".control-group").removeClass("error");
     }
 
-    //change name of inflation_2 to output_expectation
     var output_expectation = $("#output_expectation_input").val();
     if (output_expectation === "") {
       $("#output_expectation_input").closest(".control-group").addClass("error");
       help = $("<span>").
         addClass("help-inline").
-        text("Please input your output @ t+1 estimate");
+          //grammatically awkward
+          text("Please input your output estimate");
       $("#output_expectation_input").after(help);
     } else {
       $("#output_expectation_input").closest(".control-group").removeClass("error");
     }
-
-    // let expectedErrorT1 = $("#expected_error_input_t1").val();
-    // if ( expectedErrorT1 === '' ) {
-    //   $('#expected_error_input_t1').closest('.control-group').addClass('error');
-    //   help = $('<span>').
-    //     addClass('help-inline').
-    //     text('Please input your expected error estimate');
-    //   $('#expected_error_input_t1').after(help);
-    // } else if ( expectedErrorT1[0] === '-' ) { 
-    //   $('#expected_error_input_t1').closest('.control-group').addClass('error');
-    //   help = $('<span>').
-    //     addClass('help-inline').
-    //     text('Expected error cannot be negative');
-    //   $('#expected_error_input_t1').after(help);
-    // } else {
-    //   $("#expected_error_input_t1").closest(".control-group").removeClass("error");
-    // }
-
-    // let expectedErrorT2 = $("#expected_error_input_t2").val();
-    // if ( expectedErrorT2 === '' ) {
-    //   $('#expected_error_input_t2').closest('.control-group').addClass('error');
-    //   help = $('<span>').
-    //     addClass('help-inline').
-    //     text('Please input your expected error estimate');
-    //   $('#expected_error_input_t2').after(help);
-    // } else if ( expectedErrorT2[0] === '-' ) { 
-    //   $('#expected_error_input_t2').closest('.control-group').addClass('error');
-    //   help = $('<span>').
-    //     addClass('help-inline').
-    //     text('Expected error cannot be negative');
-    //   $('#expected_error_input_t2').after(help);
-    // } else {
-    //   $("#expected_error_input_t2").closest(".control-group").removeClass("error");
-    // }
     
     if (help === undefined) {
       $("input").attr("disabled", "disabled");
