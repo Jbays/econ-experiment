@@ -244,12 +244,26 @@ function replot() {
   };
   var red = "#cc0000";
   var blue = "#3465a4";
-  var green = "#00ff00";
+  // var green = "#00ff00";
   var orange = "#FFA500";
-  
-  opts.legend.container = "#plot1-legend"; // places the legend outside the plot, in the DOM
+
+  // places the legend outside the plot, in the DOM
+  opts.legend.container = "#plot1-legend";
 
   $.plot($("#plot1"), [
+    {
+      data: shock_series,
+      label: "Shock"
+    },
+    {
+      data: interest_rate_series,
+      label: "Interest Rate"
+    }
+  ], opts);
+
+  opts.legend.container = "#plot2-legend"; 
+
+  $.plot($("#plot2"), [
     {
       data: inflation_series,
       color: red,
@@ -262,8 +276,8 @@ function replot() {
     },
   ], opts);
 
-  opts.legend.container = "#plot2-legend"
-  $.plot($("#plot2"), [
+  opts.legend.container = "#plot3-legend"
+  $.plot($("#plot3"), [
     //NOTE: currently this is graphinig inflation
     //but actually this graph should represent the output
     {
@@ -274,22 +288,10 @@ function replot() {
     {
       data: output_expectation_forecast_series,
       color: orange,
-      label: "Output Forecast @ period+1 (X@t+2)"
+      label: "Output Forecast @ period+1 (X@t+1)"
     },
   ], opts);
 
-  opts.legend.container = "#plot3-legend";
-
-  $.plot($("#plot3"), [
-    {
-      data: shock_series,
-      label: "Shock"
-    },
-    {
-      data: interest_rate_series,
-      label: "Interest Rate"
-    }
-  ], opts);
   opts.legend.container = null;
 }
 
@@ -326,13 +328,12 @@ function setup_tooltip() {
         var period = Math.round(item.datapoint[0].toFixed(2));
         var y = item.datapoint[1].toFixed(2);
         var label;
+        //this logic is extremely unclear
         if (item.series.label === undefined) {
           label = "Period " + period + " = " + y;
         } else if (item.series.label.indexOf("Forecast") !== -1) {
-          //if dot color is orange, have one style of label
-          if ( item.series.color === '#FFA500') {
-            label = `Inflation Prediction from Period ${period-2} for Period ${period} = ${y}`;
-          }  else if (item.series.color === '#3465a4' ) {
+          //if dot color is orange or blue, one style of label
+          if ( item.series.color === '#FFA500' || item.series.color === '#3465a4' ) {
             label = `Inflation Prediction from Period ${period-1} for Period ${period} = ${y}`;
           } else {
             label = item.series.label + " for Period " + period + " = " + y;
@@ -425,6 +426,7 @@ function handle_shock(msg) {
     let inflation_1_forecasts_for_all_players = [];
     let inflation_2_forecasts_for_all_players = [];
 
+    //what does this do?  related to the variables above...
     for (let subject in forecasts) {
       if (forecasts[subject].inflation_expectation !== null && forecasts[subject].output_expectation !== null) {
         //these variables were mislabeled.  should be inflation_1 and inflation_2 for inflation and output (respectively)
@@ -433,6 +435,7 @@ function handle_shock(msg) {
       }
     }
 
+    //these two variables will need new labels
     var median_of_t_1 = median(inflation_1_forecasts_for_all_players); 
     var median_of_t_2 = median(inflation_2_forecasts_for_all_players);
     
@@ -450,9 +453,21 @@ function handle_shock(msg) {
     var output = (r.config.rholes_gamma_one * r.config.rholes_gamma_two * median_of_t_1) - 
                  (r.config.rholes_gamma_one * r.config.rholes_beta * (r.config.rholes_kappa**-1) * median_of_t_2) + 
                  (r.config.rholes_gamma_one * (r.config.rholes_sigma**-1) * testershock);
-    
-    var interest_rate =  (r.config.rholes_phipi*inflation) + (r.config.rholes_phix*output);
+  
+    console.log('here is where you calculate interest rate');
 
+    if ( r.config.treatment === 1 ) {
+      console.log('calculate interest with IT treatment');
+    } else if ( r.config.treatment === 2 ) {
+      console.log('calculate interest with PLT treatment')
+    } else if ( r.config.treatment === 3 ) {
+      console.log('calculate interest with AIT treatment')
+    } else if ( r.config.treatment === 4 ) {
+      console.log('calculate interest with NGDP treatment')
+    }
+
+    var interest_rate =  (r.config.rholes_phipi*inflation) + (r.config.rholes_phix*output);
+    
     interest_rate = Math.round(interest_rate);
     output = Math.round(output);
     inflation = Math.round(inflation);
