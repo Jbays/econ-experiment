@@ -423,35 +423,41 @@ function handle_shock(msg) {
   }
   
   if (all_forecasts_in()) {
-    let inflation_1_forecasts_for_all_players = [];
-    let inflation_2_forecasts_for_all_players = [];
+    let inflation_forecasts_for_all_players = [];
+    let output_forecasts_for_all_players = [];
 
     //what does this do?  related to the variables above...
     for (let subject in forecasts) {
+      console.log('forecasts>>',forecasts)
+      console.log('subject>>',subject)
       if (forecasts[subject].inflation_expectation !== null && forecasts[subject].output_expectation !== null) {
         //these variables were mislabeled.  should be inflation_1 and inflation_2 for inflation and output (respectively)
-        inflation_1_forecasts_for_all_players.push(forecasts[subject].inflation_expectation);
-        inflation_2_forecasts_for_all_players.push(forecasts[subject].output_expectation);
+        inflation_forecasts_for_all_players.push(forecasts[subject].inflation_expectation);
+        output_forecasts_for_all_players.push(forecasts[subject].output_expectation);
       }
     }
 
-    //these two variables will need new labels
-    var median_of_t_1 = median(inflation_1_forecasts_for_all_players); 
-    var median_of_t_2 = median(inflation_2_forecasts_for_all_players);
+    console.log('inflation_forecasts_for_all_players',inflation_forecasts_for_all_players);
+    console.log('output_forecasts_for_all_players',output_forecasts_for_all_players);
+
+    //NOTE
+    //This variable is not the median inflation prediction but the direct input given from the player.
+    //how are inflation and output to be calculated?
+    var median_inflation_prediction = median(inflation_forecasts_for_all_players); 
+    var median_output_prediction = median(output_forecasts_for_all_players);
     
     // var last_inflation = inflation_series[inflation_series.length - 1][1];
-    var last_output = output_series[output_series.length - 1][1];
+    // var last_output = output_series[output_series.length - 1][1];
     // var old_x_change = last_output - output_series[output_series.length - 2][1];
     var testershock = shockarray[subperiod-2];
 
     //NOTE: RHOLES: these are the new equations for inflation, output, interest_rate
-    var inflation = (r.config.rholes_beta+r.config.rholes_kappa*r.config.rholes_gamma_one*r.config.rholes_gamma_two)*median_of_t_1 - 
-                    r.config.rholes_gamma_one*r.config.rholes_beta*median_of_t_2 + 
+    var inflation = (r.config.rholes_beta+r.config.rholes_kappa*r.config.rholes_gamma_one*r.config.rholes_gamma_two)*median_inflation_prediction - 
+                    r.config.rholes_gamma_one*r.config.rholes_beta*median_output_prediction + 
                     r.config.rholes_kappa*r.config.rholes_gamma_one*(r.config.rholes_sigma**-1)*testershock;
-    // var output = (r.config.rholes_gamma_one*r.config.rholes_gamma_two*e_i) - (r.config.rholes_gamma_one*(r.config.rholes_kappa**-1)*e_o)
     
-    var output = (r.config.rholes_gamma_one * r.config.rholes_gamma_two * median_of_t_1) - 
-                 (r.config.rholes_gamma_one * r.config.rholes_beta * (r.config.rholes_kappa**-1) * median_of_t_2) + 
+    var output = (r.config.rholes_gamma_one * r.config.rholes_gamma_two * median_inflation_prediction) - 
+                 (r.config.rholes_gamma_one * r.config.rholes_beta * (r.config.rholes_kappa**-1) * median_output_prediction) + 
                  (r.config.rholes_gamma_one * (r.config.rholes_sigma**-1) * testershock);
   
     console.log('here is where you calculate interest rate');
@@ -472,8 +478,8 @@ function handle_shock(msg) {
     output = Math.round(output);
     inflation = Math.round(inflation);
     
-    append(e_i_series, median_of_t_1);
-    append(e_o_series, median_of_t_2);
+    append(e_i_series, median_inflation_prediction);
+    append(e_o_series, median_output_prediction);
     append(inflation_series, inflation);
     append(output_series, output);
     append(output_forecast_series, output);
@@ -569,8 +575,8 @@ function handle_shock(msg) {
     if (min_group()) {
       r.send("summary", {
         subperiod: subperiod-1,
-        median_of_t_1: median_of_t_1,
-        median_of_t_2: median_of_t_2,
+        median_inflation_prediction: median_inflation_prediction,
+        median_output_prediction: median_output_prediction,
         shock: last_shock_size,
         shockarray: shockarray[subperiod-2],
         testershock: testershock,
