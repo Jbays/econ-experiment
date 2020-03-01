@@ -264,7 +264,7 @@ function replot() {
   opts.legend.container = "#plot2-legend"; 
 
   if ( r.config.treatment === 1 || r.config.treatment === 3  ) {
-    let inflation_target_array = [[-4,5],[-3,5],[-2,5],[-1,5],[0,5],[1,5]];
+    let inflation_target_array = [[-4,r.config.inflation_target],[40,r.config.inflation_target]];
 
     $.plot($("#plot2"), [
       {
