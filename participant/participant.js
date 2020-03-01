@@ -431,7 +431,6 @@ function setup_tooltip() {
   });
 }
 
-let two_previous_forecast = {};
 let one_previous_forecast = {};
 var forecasts = {};
 
@@ -487,18 +486,17 @@ function handle_forecast(msg) {
 function handle_shock(msg) {
   last_shock = msg;
 
-  var curr_shock_size = msg.Value.shock;
   var last_shock_size = Math.round(parseFloat($(".curr_shock_size").text(), 10));
-  $(".curr_shock_size").text(curr_shock_size);
-  $(".expected_shock_size").text(Math.round(r.config.p * curr_shock_size));
+  // $(".curr_shock_size").text(curr_shock_size);
+  // $(".expected_shock_size").text(Math.round(r.config.p * curr_shock_size));
   
   //HACK - 23 Sept 2019
   let subperiod = parseInt($(".period").text(), 10);
   
   //don't append on the first go
-  if ( subperiod > 1 ) {
-    append(shock_series, msg.Value.shock);
-  }
+  // if ( subperiod > 1 ) {
+  //   append(shock_series, msg.Value.shock);
+  // }
   
   if (all_forecasts_in()) {
     let inflation_forecasts_for_all_players = [];
@@ -586,8 +584,6 @@ function handle_shock(msg) {
     } else if ( r.config.treatment === 4 ) {
       console.log('calculate interest with NGDP treatment')
     }
-
-    
     
     interest_rate = Math.round(interest_rate);
     output = Math.round(output);
@@ -599,52 +595,35 @@ function handle_shock(msg) {
     append(output_series, output);
     append(output_forecast_series, output);
     
-    if (r.username in one_previous_forecast) {
-      //I don't think this conditional will ever hit
-      if (one_previous_forecast[r.username].inflation === null || one_previous_forecast[r.username].output === null) {
-        console.log('are you hitting this?');
-        r.send("points", 0, {period: 0, group: 0});
-        
-        $(".last_inflation_forecast").text("N/A");
-        $(".last_output_forecast").text("N/A");
-        $(".last_inflation_forecast_error").text("N/A");
-        $(".last_output_forecast_error").text("N/A");
-        $(".last_score").text("0");
-      } else {
-        console.log('begin calculating the score');
-        console.log('interest_rate',interest_rate);
-        console.log('output',output);
-        console.log('inflation',inflation);
+    console.log('begin calculating the score');
+    console.log('interest_rate',interest_rate);
+    console.log('output',output);
+    console.log('inflation',inflation);
 
-        const subperiod = parseInt($(".period").text(), 10);
-        const players_last_output_forecast_num = parseInt(output_expectation_forecast_series[subperiod-2][1]);
-        const players_last_inflation_forecast_num = parseInt(inflation_expectation_forecast_series[subperiod-2][1]);
+    const players_last_output_forecast_num = parseInt(output_expectation_forecast_series[subperiod-2][1]);
+    const players_last_inflation_forecast_num = parseInt(inflation_expectation_forecast_series[subperiod-2][1]);
+    const absolute_forecast_error_output = Math.abs(players_last_output_forecast_num-output);
+    const absolute_forecast_error_inflation = Math.abs(players_last_inflation_forecast_num-inflation);
+    const score = 0.30*(2**(-0.01*absolute_forecast_error_output))+0.30*(2**(-0.01*absolute_forecast_error_inflation))
 
-        console.log('players_last_output_forecast_num>>',players_last_output_forecast_num);
+    console.log('absolute_forecast_error_output>>',absolute_forecast_error_output);
+    console.log('absolute_forecast_error_inflation>>',absolute_forecast_error_inflation);
+    console.log('score>>',score);
 
-        const absolute_forecast_error_output = Math.abs(players_last_output_forecast_num-output);
-        const absolute_forecast_error_inflation = Math.abs(players_last_inflation_forecast_num-inflation);
-
-        const score = 0.30*(2**(-0.01*absolute_forecast_error_output))+0.30*(2**(-0.01*absolute_forecast_error_inflation))
-
-        r.set_points(r.points + score);
-        r.send("points", score, { subperiod: subperiod});
-        // r.send("points", score, {period: 0, group: 0, subperiod: subperiod});
-      }
-    }
+    r.set_points(r.points + score);
+    r.send("points", score, { subperiod: subperiod});
+    // r.send("points", score, {period: 0, group: 0, subperiod: subperiod});
     
     //at some point, forecasts is overwriting one_previous_forecast
     for (subject in forecasts) {
       one_previous_forecast[subject] = forecasts[subject];
       forecasts[subject] = undefined;
     }
-    // $(".last_inflation").text(inflation);
-    // $(".last_output").text(output);
 
-    var next_interest_rate = interest_rate;
+    // var next_interest_rate = interest_rate;
 
-    $(".curr_interest_rate").text(next_interest_rate);
-    append(interest_rate_series, next_interest_rate);
+    // $(".curr_interest_rate").text(next_interest_rate);
+    // append(interest_rate_series, next_interest_rate);
     if (min_group()) {
       r.send("summary", {
         subperiod: subperiod-1,
@@ -656,7 +635,7 @@ function handle_shock(msg) {
         interest_rate: interest_rate,
         output: output,
         inflation: inflation,
-        next_interest_rate: next_interest_rate,
+        // next_interest_rate: next_interest_rate,
       });
     }
   }
