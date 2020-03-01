@@ -244,7 +244,7 @@ function replot() {
   };
   var red = "#cc0000";
   var blue = "#3465a4";
-  // var green = "#00ff00";
+  var green = "#00ff00";
   var orange = "#FFA500";
 
   // places the legend outside the plot, in the DOM
@@ -263,23 +263,47 @@ function replot() {
 
   opts.legend.container = "#plot2-legend"; 
 
-  $.plot($("#plot2"), [
-    {
-      data: inflation_series,
-      color: red,
-      label: "Inflation"
-    },
-    {
-      data: inflation_expectation_forecast_series,
-      color: blue,
-      label: "Inflation Forecast @ period+1 (Π@t+1)"
-    },
-  ], opts);
+  if ( r.config.treatment === 1 || r.config.treatment === 3  ) {
+    let inflation_target_array = [[-4,5],[-3,5],[-2,5],[-1,5],[0,5],[1,5]];
+
+    $.plot($("#plot2"), [
+      {
+        data: inflation_series,
+        color: red,
+        label: "Inflation"
+      },
+      {
+        data: inflation_expectation_forecast_series,
+        color: blue,
+        label: "Inflation Forecast @ period+1 (Π@t+1)"
+      },
+      {
+        data: inflation_target_array,
+        color:orange,
+        lines: { show:true, },
+        points:{ show:false },
+        label:"Inflation Target"
+      }
+    ], opts);
+
+  } else {
+    $.plot($("#plot2"), [
+      {
+        data: inflation_series,
+        color: red,
+        label: "Inflation"
+      },
+      {
+        data: inflation_expectation_forecast_series,
+        color: blue,
+        label: "Inflation Forecast @ period+1 (Π@t+1)"
+      },
+    ], opts);
+  }
+
 
   opts.legend.container = "#plot3-legend"
   $.plot($("#plot3"), [
-    //NOTE: currently this is graphinig inflation
-    //but actually this graph should represent the output
     {
       data: output_series,
       color: red,
@@ -290,6 +314,22 @@ function replot() {
       color: orange,
       label: "Output Forecast @ period+1 (X@t+1)"
     },
+  ], opts);
+
+  opts.legend.container = "#plot4-legend"
+  $.plot($("#plot4"), [
+    //NOTE: currently this is graphinig output
+    //but actually this graph should represent the price level (which is a constant)
+    {
+      data: output_series,
+      color: green,
+      label: "Price Level"
+    },
+    // {
+    //   data: output_expectation_forecast_series,
+    //   color: orange,
+    //   label: "Output Forecast @ period+1 (X@t+1)"
+    // },
   ], opts);
 
   opts.legend.container = null;
