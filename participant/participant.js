@@ -359,6 +359,8 @@ function replot() {
       },
     ], opts);
   } else {
+    //treatment is either 1 or 3.
+
     $.plot($("#plot4"), [
       //NOTE @ 1 March 2020: currently this is graphing output
       //but actually this graph should represent the NGDP)
@@ -460,7 +462,6 @@ function handle_forecast(msg) {
   
   forecasts[msg.Sender] = msg.Value;
   if (all_forecasts_in()) {
-    console.log('all_forecasts_in called!');
     $("#inflation_expectation_input").val("");
     $("#output_expectation_input").val("");
     var subperiod = $(".period").text();
@@ -472,7 +473,6 @@ function handle_forecast(msg) {
     subperiod++;
     $(".period").text(subperiod);
     if (min_group()) {
-      console.log('what happens here?');
       var draw = rand_shock();
       r.send("shock", {subperiod: subperiod, draw: draw, shock: shockarray[subperiod-1]});
       r.send("progress", {period: r.period, subperiod: subperiod}, {period: 0, group: 0});
@@ -612,66 +612,24 @@ function handle_shock(msg) {
         $(".last_score").text("0");
       } else {
         console.log('begin calculating the score');
-        
-        /** THIS PART OF THE CODE DID THREE THINGS:
-         * 1. CALCULATED THE SCORE
-         * 2. SENT THE SCORE TO THE SERVER 
-         * 3. UPDATED TEXT FIELDS IN THE UI
-         * 
-         * let score = 0;
-         * let randomNumber = Math.random();
-         *
-         * let E_inflation_1 = parseInt(one_previous_forecast[r.username].inflation_1, 10);
-         * let E_inflation_2;
-         * let E_inflation_2_from_three_periods_ago;
-         * 
-         * participant gets scored either on their inflation prediction OR their expected error on said prediction.
-        //should be 50/50.
-        // if ( randomNumber < 0.5 ) {
-        //   //score their inflation prediction
-          
-        //   //if the third period or after
-        //   if ( output_expectation_forecast_series.length > 2 ) {
-        //     E_inflation_2_from_three_periods_ago = output_expectation_forecast_series[output_expectation_forecast_series.length-3][1];
-        //     E_inflation_2 = parseInt(E_inflation_2_from_three_periods_ago, 10);
-  
-        //     //score equals the accuracy of their predictions for the inflation at t+1, t+2,
-        //     score =
-        //       r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_1 - inflation)) +
-        //       r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_2 - inflation));
-        //   } else {
-        //     //score equals the accuracy of their predictions for the inflation at t+1
-        //     score = r.config.R_0 * Math.pow(2, -r.config.alpha*Math.abs(E_inflation_1 - inflation));
-        //   }
-        // } else {
-        //   //take the expected error from the previous period
-          let previous_expected_error_t_1 = parseInt(expected_error_series_t1[expected_error_series_t1.length-1][1]);
-          let previous_expected_error_t_2;
-          
-        //   if ( output_expectation_forecast_series.length > 2 ) {
-        //     previous_expected_error_t_2 = parseInt(expected_error_series_t2[expected_error_series_t2.length-2][1]);
-        //     E_inflation_2_from_three_periods_ago = output_expectation_forecast_series[output_expectation_forecast_series.length-3][1];
-        //     E_inflation_2 = parseInt(E_inflation_2_from_three_periods_ago, 10);
+        console.log('interest_rate',interest_rate);
+        console.log('output',output);
+        console.log('inflation',inflation);
 
-        //     if ( (E_inflation_2 + previous_expected_error_t_2) >= inflation && 
-        //          (E_inflation_2 - previous_expected_error_t_2) <= inflation ) {
-        //       score = 15 / (10+previous_expected_error_t_2)
-        //     }
-        //   }
-          
-        //   if ( (E_inflation_1 + previous_expected_error_t_1) >= inflation && 
-        //        (E_inflation_1 - previous_expected_error_t_1) <= inflation ) {
-        //     score += 15 / (10+previous_expected_error_t_1);
-        //   }
-        // }
+        const subperiod = parseInt($(".period").text(), 10);
+        const players_last_output_forecast_num = parseInt(output_expectation_forecast_series[subperiod-2][1]);
+        const players_last_inflation_forecast_num = parseInt(inflation_expectation_forecast_series[subperiod-2][1]);
 
-        // r.set_points(r.points + score);
+        console.log('players_last_output_forecast_num>>',players_last_output_forecast_num);
+
+        const absolute_forecast_error_output = Math.abs(players_last_output_forecast_num-output);
+        const absolute_forecast_error_inflation = Math.abs(players_last_inflation_forecast_num-inflation);
+
+        const score = 0.30*(2**(-0.01*absolute_forecast_error_output))+0.30*(2**(-0.01*absolute_forecast_error_inflation))
+
+        r.set_points(r.points + score);
+        r.send("points", score, { subperiod: subperiod});
         // r.send("points", score, {period: 0, group: 0, subperiod: subperiod});
-
-        // $(".last_inflation_forecast").text(E_inflation_1.toFixed(0));
-        // $(".last_inflation_forecast_error").text(Math.abs(E_inflation_1 - inflation).toFixed(0));
-        // $(".last_score").text(score.toFixed(2));
-        */
       }
     }
     
@@ -699,7 +657,6 @@ function handle_shock(msg) {
         output: output,
         inflation: inflation,
         next_interest_rate: next_interest_rate,
-        // old_x_change: old_x_change
       });
     }
   }
