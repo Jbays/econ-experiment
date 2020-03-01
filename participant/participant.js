@@ -428,8 +428,6 @@ function handle_shock(msg) {
 
     //what does this do?  related to the variables above...
     for (let subject in forecasts) {
-      console.log('forecasts>>',forecasts)
-      console.log('subject>>',subject)
       if (forecasts[subject].inflation_expectation !== null && forecasts[subject].output_expectation !== null) {
         //these variables were mislabeled.  should be inflation_1 and inflation_2 for inflation and output (respectively)
         inflation_forecasts_for_all_players.push(forecasts[subject].inflation_expectation);
@@ -437,8 +435,8 @@ function handle_shock(msg) {
       }
     }
 
-    console.log('inflation_forecasts_for_all_players',inflation_forecasts_for_all_players);
-    console.log('output_forecasts_for_all_players',output_forecasts_for_all_players);
+    // console.log('inflation_forecasts_for_all_players',inflation_forecasts_for_all_players);
+    // console.log('output_forecasts_for_all_players',output_forecasts_for_all_players);
 
     //NOTE
     //This variable is not the median inflation prediction but the direct input given from the player.
@@ -446,33 +444,72 @@ function handle_shock(msg) {
     var median_inflation_prediction = median(inflation_forecasts_for_all_players); 
     var median_output_prediction = median(output_forecasts_for_all_players);
     
-    // var last_inflation = inflation_series[inflation_series.length - 1][1];
-    // var last_output = output_series[output_series.length - 1][1];
-    // var old_x_change = last_output - output_series[output_series.length - 2][1];
-    var testershock = shockarray[subperiod-2];
-
-    //NOTE: RHOLES: these are the new equations for inflation, output, interest_rate
-    var inflation = (r.config.rholes_beta+r.config.rholes_kappa*r.config.rholes_gamma_one*r.config.rholes_gamma_two)*median_inflation_prediction - 
-                    r.config.rholes_gamma_one*r.config.rholes_beta*median_output_prediction + 
-                    r.config.rholes_kappa*r.config.rholes_gamma_one*(r.config.rholes_sigma**-1)*testershock;
+    var incoming_shock = shockarray[subperiod-2];
     
-    var output = (r.config.rholes_gamma_one * r.config.rholes_gamma_two * median_inflation_prediction) - 
-                 (r.config.rholes_gamma_one * r.config.rholes_beta * (r.config.rholes_kappa**-1) * median_output_prediction) + 
-                 (r.config.rholes_gamma_one * (r.config.rholes_sigma**-1) * testershock);
-  
     console.log('here is where you calculate interest rate');
+
+    let inflation = 1;
+    let output = 2;
+    let interest_rate = 3;
+    let price_today = 4;
+    let national_gross_domestic_product = 5;
 
     if ( r.config.treatment === 1 ) {
       console.log('calculate interest with IT treatment');
+      output =  r.config.A * median_output_prediction + 
+                r.config.B*median_inflation_prediction + 
+                r.config.C*incoming_shock + 
+                r.config.D*r.config.r_bar;
+      inflation = r.config.F*median_inflation_prediction + 
+                  r.config.G*output;
+      interest_rate = r.config.phi_pi*inflation +
+                      r.config.phi_x*r.config.r_bar;
+      // price_today = price_yesterday + inflation;
+      //national_gross_domestic_product = output + price_today;
+      if ( interest_rate <= (Math.log(r.config.B)-(0.5/400)) ) {
+        output = median_output_prediction + median_inflation_prediction + incoming_shock - interest_rate;
+        inflation = r.config.beta*median_output_prediction + r.config.kappa*output;
+        interest_rate = -0.5/400;
+      }
     } else if ( r.config.treatment === 2 ) {
       console.log('calculate interest with PLT treatment')
+
+      console.log('this is inflation',inflation);
+      console.log('this is output',output);
+      console.log('this is interest_rate',interest_rate);
+      output =  r.config.H * median_output_prediction + 
+                r.config.J*median_inflation_prediction + 
+                r.config.L*incoming_shock + 
+                r.config.M*r.config.r_bar
+                //+ r.config.N*price_yesterday;
+      inflation = r.config.beta*median_inflation_prediction + 
+                  r.config.kappa*output;
+      
+      interest_rate = r.config.r_bar 
+                      // + r.config.phi_pi*price_yesterday 
+                      + r.config.phi_x*output;
+      // price_today = price_yesterday + inflation;
+      //national_gross_domestic_product = output + price_today;
+
+      console.log('after inflation',inflation);
+      console.log('after output',output);
+      console.log('after interest_rate',interest_rate);
+      
+      if ( interest_rate <= (Math.log(r.config.B)-(0.5/400)) ) {
+        console.log('interest rate is negative!');
+        console.log('this is interest_rate',interest_rate);
+        output = median_output_prediction + median_inflation_prediction + incoming_shock - interest_rate;
+        inflation = r.config.beta*median_output_prediction + r.config.kappa*output;
+        interest_rate = -0.5/400;
+      }
+
     } else if ( r.config.treatment === 3 ) {
       console.log('calculate interest with AIT treatment')
     } else if ( r.config.treatment === 4 ) {
       console.log('calculate interest with NGDP treatment')
     }
 
-    var interest_rate =  (r.config.rholes_phipi*inflation) + (r.config.rholes_phix*output);
+    
     
     interest_rate = Math.round(interest_rate);
     output = Math.round(output);
@@ -579,7 +616,7 @@ function handle_shock(msg) {
         median_output_prediction: median_output_prediction,
         shock: last_shock_size,
         shockarray: shockarray[subperiod-2],
-        testershock: testershock,
+        incoming_shock: incoming_shock,
         interest_rate: interest_rate,
         output: output,
         inflation: inflation,
