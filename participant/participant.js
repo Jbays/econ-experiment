@@ -317,20 +317,58 @@ function replot() {
   ], opts);
 
   opts.legend.container = "#plot4-legend"
-  $.plot($("#plot4"), [
-    //NOTE: currently this is graphinig output
-    //but actually this graph should represent the price level (which is a constant)
-    {
-      data: output_series,
-      color: green,
-      label: "Price Level"
-    },
-    // {
-    //   data: output_expectation_forecast_series,
-    //   color: orange,
-    //   label: "Output Forecast @ period+1 (X@t+1)"
-    // },
-  ], opts);
+
+  if ( r.config.treatment === 2  ) {
+    let price_level_target_array = [[-4,r.config.price_level_target],[40,r.config.price_level_target]];
+
+    $.plot($("#plot4"), [
+      {
+        data: price_level_target_array,
+        color: orange,
+        lines: { show:true, },
+        points:{ show:false },
+        label: "Price Level"
+      },
+      //NOTE @ 1 March 2020: currently this is graphing output
+      //but actually this graph should represent the NGDP)
+      {
+        data: output_series,
+        color: green,
+        label: "NGDP"
+      },
+    ], opts);
+
+  } else if ( r.config.treatment === 4 ) {
+    const nominal_gdp_target = r.config.price_level_target
+    let nominal_gdp_target_array = [[-4,nominal_gdp_target],[40,nominal_gdp_target]];
+
+    $.plot($("#plot4"), [
+      {
+        data: nominal_gdp_target_array,
+        color: orange,
+        lines: { show:true, },
+        points:{ show:false },
+        label: "Nominal GDP target"
+      },
+      //NOTE @ 1 March 2020: currently this is graphing output
+      //but actually this graph should represent the NGDP)
+      {
+        data: output_series,
+        color: green,
+        label: "NGDP"
+      },
+    ], opts);
+  } else {
+    $.plot($("#plot4"), [
+      //NOTE @ 1 March 2020: currently this is graphing output
+      //but actually this graph should represent the NGDP)
+      {
+        data: output_series,
+        color: green,
+        label: "NGDP"
+      },
+    ], opts);
+  }
 
   opts.legend.container = null;
 }
