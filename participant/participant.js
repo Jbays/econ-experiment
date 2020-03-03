@@ -497,8 +497,19 @@ function handle_shock(msg) {
   // }
   
   if (all_forecasts_in()) {
+    let inflation;
+    let output;
+    let interest_rate;
+    let todays_price_level_target;
+    let todays_nominal_gdp_target;
     let inflation_forecasts_for_all_players = [];
     let output_forecasts_for_all_players = [];
+    
+    let incoming_shock = shockarray[subperiod-2];
+    // this does NOT need to be equal to r.config.price_level_target, etc.
+    // this DOES need to be equal to the last price_level_target graphed.
+    // const config_price_level_target = r.config.price_level_target;
+    // const config_nominal_gdp_target = r.config.nominal_gdp_target;
 
     //what does this do?  related to the variables above...
     for (let subject in forecasts) {
@@ -509,25 +520,11 @@ function handle_shock(msg) {
       }
     }
 
-    console.log('forecasts',JSON.stringify(forecasts));
-    console.log('inflation_forecasts_for_all_players.toString()>>>',inflation_forecasts_for_all_players.toString());
-    console.log('output_forecasts_for_all_players.toString()>>>',output_forecasts_for_all_players.toString());
-
     //NOTE 1 March 2020
     //takes the median prediction for the group in that given period
-    var median_inflation_prediction = median(inflation_forecasts_for_all_players); 
-    var median_output_prediction = median(output_forecasts_for_all_players);
+    let median_inflation_prediction = median(inflation_forecasts_for_all_players); 
+    let median_output_prediction = median(output_forecasts_for_all_players);
     
-    var incoming_shock = shockarray[subperiod-2];
-    
-    console.log('here is where you calculate interest rate');
-
-    let inflation = 1;
-    let output = 2;
-    let interest_rate = 3;
-    let price_today = 4;
-    let national_gross_domestic_product = 5;
-
     if ( r.config.treatment === 1 ) {
       console.log('calculate interest with IT treatment');
       output =  r.config.A * median_output_prediction + 
@@ -538,18 +535,20 @@ function handle_shock(msg) {
                   r.config.G*output;
       interest_rate = r.config.phi_pi*inflation +
                       r.config.phi_x*r.config.r_bar;
-      // price_today = price_yesterday + inflation;
-      //national_gross_domestic_product = output + price_today;
+      
       if ( interest_rate <= (Math.log(r.config.B)-(0.5/400)) ) {
         output = median_output_prediction + median_inflation_prediction + incoming_shock - interest_rate;
         inflation = r.config.beta*median_output_prediction + r.config.kappa*output;
         interest_rate = -0.5/400;
       }
+      // todays_price_level_target = config_price_level_target + inflation;
+      // todays_nominal_gdp_target = config_nominal_gdp_target + output;
+
     } else if ( r.config.treatment === 2 ) {
       console.log('calculate interest with PLT treatment')
-      console.log('this is inflation',inflation);
-      console.log('this is output',output);
-      console.log('this is interest_rate',interest_rate);
+      // console.log('this is inflation',inflation);
+      // console.log('this is output',output);
+      // console.log('this is interest_rate',interest_rate);
       output =  r.config.H * median_output_prediction + 
                 r.config.J*median_inflation_prediction + 
                 r.config.L*incoming_shock + 
@@ -564,8 +563,8 @@ function handle_shock(msg) {
       // price_today = price_yesterday + inflation;
       //national_gross_domestic_product = output + price_today;
 
-      console.log('after inflation',inflation);
-      console.log('after output',output);
+      // console.log('after inflation',inflation);
+      // console.log('after output',output);
       console.log('after interest_rate',interest_rate);
       
       if ( interest_rate <= (Math.log(r.config.B)-(0.5/400)) ) {
@@ -585,17 +584,19 @@ function handle_shock(msg) {
     interest_rate = Math.round(interest_rate);
     output = Math.round(output);
     inflation = Math.round(inflation);
-    
+
+    append(interest_rate_series,interest_rate);
+    append(shock_series,incoming_shock);
     append(e_i_series, median_inflation_prediction);
     append(e_o_series, median_output_prediction);
     append(inflation_series, inflation);
     append(output_series, output);
     append(output_forecast_series, output);
     
-    console.log('begin calculating the score');
-    console.log('interest_rate',interest_rate);
-    console.log('output',output);
-    console.log('inflation',inflation);
+    // console.log('begin calculating the score');
+    // console.log('interest_rate',interest_rate);
+    // console.log('output',output);
+    // console.log('inflation',inflation);
 
     const players_last_output_forecast_num = parseInt(output_expectation_forecast_series[subperiod-2][1]);
     const players_last_inflation_forecast_num = parseInt(inflation_expectation_forecast_series[subperiod-2][1]);
@@ -603,9 +604,9 @@ function handle_shock(msg) {
     const absolute_forecast_error_inflation = Math.abs(players_last_inflation_forecast_num-inflation);
     const score = 0.30*(2**(-0.01*absolute_forecast_error_output))+0.30*(2**(-0.01*absolute_forecast_error_inflation))
 
-    console.log('absolute_forecast_error_output>>',absolute_forecast_error_output);
-    console.log('absolute_forecast_error_inflation>>',absolute_forecast_error_inflation);
-    console.log('score>>',score);
+    // console.log('absolute_forecast_error_output>>',absolute_forecast_error_output);
+    // console.log('absolute_forecast_error_inflation>>',absolute_forecast_error_inflation);
+    // console.log('score>>',score);
 
     r.set_points(r.points + score);
     r.send("points", score, { subperiod: subperiod});
