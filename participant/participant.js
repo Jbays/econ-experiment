@@ -130,27 +130,38 @@ function showTooltip(x, y, contents) {
   }).appendTo("body").fadeIn(200);
 }
 
+// Actual (realized) inflation at start point!
+var inflation_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0, 0]];
+// Actual (realized) output
+var output_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0, 0]];
+// Interest rate and shock
+var interest_rate_series = [[-4, 0], [-3,0], [-2, 0], [-1, 0], [0, 0]];
+// var inflation_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0, 0],[1,10],[2,30],[3,-20],[4,-10],[5,40]];
+
 // Expected inflation
 var e_i_series = [[0, 0]];
 // Expected output
 var e_o_series = [[0, 0]];
-// Actual (realized) inflation at start point!
-var inflation_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0, 0]];
 
-// var inflation_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0, 0],[1,10],[2,30],[3,-20],[4,-10],[5,40]];
 // Participant's inflation forecast
 let inflation_expectation_forecast_series = [];
 // Participant's output forecast
 let output_expectation_forecast_series = [];
 
-// Actual (realized) output
-var output_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0, 0]];
+let price_level_target_array = [];
+let nominal_gdp_target_array = [];
 
-//getting output to work again
-var output_forecast_series = [];
+/**
+ * @name loadTargetVariableArrays
+ * @description Adds both dummy and config variable data to container arrays.
+ *  For plotting price_level_target, nominal_gdp_target, and (possibly) inflation_target
+ * @param {*} array 
+ * @param {*} value 
+ */
 
-// Interest rate and shock
-var interest_rate_series = [[-4, 0], [-3,0], [-2, 0], [-1, 0], [0, 0]];
+function loadTargetVariableArrays(array,value){
+  console.log('hello friends');
+}
 
 var shockarray;
 
@@ -319,7 +330,6 @@ function replot() {
   opts.legend.container = "#plot4-legend"
 
   if ( r.config.treatment === 2  ) {
-    let price_level_target_array = [[-4,r.config.price_level_target],[40,r.config.price_level_target]];
 
     $.plot($("#plot4"), [
       {
@@ -339,8 +349,7 @@ function replot() {
     ], opts);
 
   } else if ( r.config.treatment === 4 ) {
-    const nominal_gdp_target = r.config.price_level_target
-    let nominal_gdp_target_array = [[-4,nominal_gdp_target],[40,nominal_gdp_target]];
+    
 
     $.plot($("#plot4"), [
       {
@@ -591,7 +600,7 @@ function handle_shock(msg) {
     append(e_o_series, median_output_prediction);
     append(inflation_series, inflation);
     append(output_series, output);
-    append(output_forecast_series, output);
+    // append(output_forecast_series, output);
     
     // console.log('begin calculating the score');
     // console.log('interest_rate',interest_rate);
@@ -654,6 +663,7 @@ function handle_shock(msg) {
 
 // finish_sync is called on page refresh, when redwood is done loading the queue it initializes variables, inputs, and some display variables
 var last_shock;
+
 function finish_sync() {
   $("#pdf_content").attr("data", r.config.instructions_url);
   
@@ -784,6 +794,21 @@ function finish_sync() {
     }
   }, 500);
   var period = parseInt($(".period").text(), 10);
+  
+  //if its the first period, populate target variable arrays
+  if ( period === 1 ) {
+    console.log('finish_sync called');
+    console.log('its this period',period);
+    //populate "target" variables arrays with the first batch of data
+    console.log('load target variable arrays!');
+    // console.log('price_level_target_array at load time',price_level_target_array)
+    console.log('r.config.price_level_target',r.config.price_level_target);
+    console.log('r.config.nominal_gdp_target',r.config.nominal_gdp_target);
+  
+    loadTargetVariableArrays(price_level_target_array,r.config.price_level_target);
+    loadTargetVariableArrays(nominal_gdp_target_array,r.config.nominal_gdp_target);
+  }
+  
   if (period <= r.config.subperiods) {
     if (ROBOTS && typeof robots === "undefined") {
       robot = setTimeout(function() {
@@ -816,7 +841,7 @@ $(function() {
       $(".total_points").text(total_points.toFixed(2));
     }
   });
-  
+
   r.finish_sync(finish_sync);
   
   setup_tooltip();
