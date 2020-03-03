@@ -487,8 +487,6 @@ function handle_shock(msg) {
   last_shock = msg;
 
   var last_shock_size = Math.round(parseFloat($(".curr_shock_size").text(), 10));
-  // $(".curr_shock_size").text(curr_shock_size);
-  // $(".expected_shock_size").text(Math.round(r.config.p * curr_shock_size));
   
   //HACK - 23 Sept 2019
   let subperiod = parseInt($(".period").text(), 10);
@@ -511,12 +509,12 @@ function handle_shock(msg) {
       }
     }
 
-    // console.log('inflation_forecasts_for_all_players',inflation_forecasts_for_all_players);
-    // console.log('output_forecasts_for_all_players',output_forecasts_for_all_players);
+    console.log('forecasts',JSON.stringify(forecasts));
+    console.log('inflation_forecasts_for_all_players.toString()>>>',inflation_forecasts_for_all_players.toString());
+    console.log('output_forecasts_for_all_players.toString()>>>',output_forecasts_for_all_players.toString());
 
-    //NOTE
-    //This variable is not the median inflation prediction but the direct input given from the player.
-    //how are inflation and output to be calculated?
+    //NOTE 1 March 2020
+    //takes the median prediction for the group in that given period
     var median_inflation_prediction = median(inflation_forecasts_for_all_players); 
     var median_output_prediction = median(output_forecasts_for_all_players);
     
@@ -549,7 +547,6 @@ function handle_shock(msg) {
       }
     } else if ( r.config.treatment === 2 ) {
       console.log('calculate interest with PLT treatment')
-
       console.log('this is inflation',inflation);
       console.log('this is output',output);
       console.log('this is interest_rate',interest_rate);
@@ -612,7 +609,6 @@ function handle_shock(msg) {
 
     r.set_points(r.points + score);
     r.send("points", score, { subperiod: subperiod});
-    // r.send("points", score, {period: 0, group: 0, subperiod: subperiod});
     
     //at some point, forecasts is overwriting one_previous_forecast
     for (subject in forecasts) {
@@ -620,10 +616,6 @@ function handle_shock(msg) {
       forecasts[subject] = undefined;
     }
 
-    // var next_interest_rate = interest_rate;
-
-    // $(".curr_interest_rate").text(next_interest_rate);
-    // append(interest_rate_series, next_interest_rate);
     if (min_group()) {
       r.send("summary", {
         subperiod: subperiod-1,
@@ -635,7 +627,6 @@ function handle_shock(msg) {
         interest_rate: interest_rate,
         output: output,
         inflation: inflation,
-        // next_interest_rate: next_interest_rate,
       });
     }
   }
