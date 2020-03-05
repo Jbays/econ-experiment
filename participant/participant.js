@@ -329,7 +329,13 @@ function replot() {
 
   opts.legend.container = "#plot4-legend"
 
+  console.log('this is price_level_target_array',price_level_target_array);
+  console.log('this is price_level_target_array.toString()',price_level_target_array.toString());
+  console.log('this is nominal_gdp_target_array',nominal_gdp_target_array);
+  console.log('this is nominal_gdp_target_array.toString()',nominal_gdp_target_array.toString());
+
   if ( r.config.treatment === 2  ) {
+    // inflation_target_array = [[-4,r.config.inflation_target],[40,r.config.inflation_target]];
 
     $.plot($("#plot4"), [
       {
@@ -349,7 +355,6 @@ function replot() {
     ], opts);
 
   } else if ( r.config.treatment === 4 ) {
-    
 
     $.plot($("#plot4"), [
       {
@@ -362,9 +367,14 @@ function replot() {
       //NOTE @ 1 March 2020: currently this is graphing output
       //but actually this graph should represent the NGDP)
       {
-        data: output_series,
+        data: nominal_gdp_target_array,
         color: green,
-        label: "NGDP"
+        label: "Nominal GDP"
+      },
+      {
+        data: price_level_target_array,
+        color: red,
+        label: "Price Level"
       },
     ], opts);
   } else {
@@ -374,9 +384,14 @@ function replot() {
       //NOTE @ 1 March 2020: currently this is graphing output
       //but actually this graph should represent the NGDP)
       {
-        data: output_series,
+        data: nominal_gdp_target_array,
         color: green,
-        label: "NGDP"
+        label: "Nominal GDP"
+      },
+      {
+        data: price_level_target_array,
+        color: red,
+        label: "Price Level"
       },
     ], opts);
   }
@@ -499,11 +514,6 @@ function handle_shock(msg) {
   
   //HACK - 23 Sept 2019
   let subperiod = parseInt($(".period").text(), 10);
-  
-  //don't append on the first go
-  // if ( subperiod > 1 ) {
-  //   append(shock_series, msg.Value.shock);
-  // }
   
   if (all_forecasts_in()) {
     let inflation;
@@ -802,11 +812,12 @@ function finish_sync() {
     //populate "target" variables arrays with the first batch of data
     console.log('load target variable arrays!');
     // console.log('price_level_target_array at load time',price_level_target_array)
-    console.log('r.config.price_level_target',r.config.price_level_target);
-    console.log('r.config.nominal_gdp_target',r.config.nominal_gdp_target);
   
-    loadTargetVariableArrays(price_level_target_array,r.config.price_level_target);
-    loadTargetVariableArrays(nominal_gdp_target_array,r.config.nominal_gdp_target);
+    price_level_target_array.push([-4,r.config.price_level_target_array],[40,r.config.price_level_target_array]);
+    nominal_gdp_target_array.push([-4,r.config.nominal_gdp_target],[40,r.config.nominal_gdp_target]);
+
+    // loadTargetVariableArrays(price_level_target_array,r.config.price_level_target);
+    // loadTargetVariableArrays(nominal_gdp_target_array,r.config.nominal_gdp_target);
   }
   
   if (period <= r.config.subperiods) {
