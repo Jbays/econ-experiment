@@ -318,7 +318,7 @@ function replot() {
     {
       data: output_series,
       color: red,
-      label: "output"
+      label: "Output"
     },
     {
       data: output_expectation_forecast_series,
