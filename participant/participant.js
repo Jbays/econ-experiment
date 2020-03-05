@@ -23,6 +23,16 @@ var append = function(a, p, s) {
   }
 };
 
+function appendSecondToLast(array,elem,period){
+  let last = array.pop();
+  let restOfArray = array.slice()
+  // below leaves the last element in the series w/the original config values
+  // restOfArray.push([period,elem],last);
+  restOfArray.push([period,elem],[40,elem]);
+
+  return restOfArray;
+}
+
 // disables input, only re-enabling it if you have not input a forecast yet
 function update_input_state_ticker() {
   $("input").attr("disabled", "disabled");
@@ -148,8 +158,8 @@ let inflation_expectation_forecast_series = [];
 // Participant's output forecast
 let output_expectation_forecast_series = [];
 
-let price_level_target_array = [];
-let nominal_gdp_target_array = [];
+let nominal_gdp_target_series = [];
+let price_level_target_series = [];
 
 /**
  * @name loadTargetVariableArrays
@@ -286,7 +296,7 @@ function replot() {
       {
         data: inflation_expectation_forecast_series,
         color: blue,
-        label: "Inflation Forecast @ period+1 (Π@t+1)"
+        label: "Inflation Forecast"
       },
       {
         data: inflation_target_array,
@@ -307,7 +317,7 @@ function replot() {
       {
         data: inflation_expectation_forecast_series,
         color: blue,
-        label: "Inflation Forecast @ period+1 (Π@t+1)"
+        label: "Inflation Forecast"
       },
     ], opts);
   }
@@ -323,23 +333,23 @@ function replot() {
     {
       data: output_expectation_forecast_series,
       color: orange,
-      label: "Output Forecast @ period+1 (X@t+1)"
+      label: "Output Forecast"
     },
   ], opts);
 
   opts.legend.container = "#plot4-legend"
 
-  console.log('this is price_level_target_array',price_level_target_array);
-  console.log('this is price_level_target_array.toString()',price_level_target_array.toString());
-  console.log('this is nominal_gdp_target_array',nominal_gdp_target_array);
-  console.log('this is nominal_gdp_target_array.toString()',nominal_gdp_target_array.toString());
+  console.log('this is price_level_target_series',price_level_target_series);
+  console.log('this is price_level_target_series.toString()',price_level_target_series.toString());
+  // console.log('this is nominal_gdp_target_series',nominal_gdp_target_series);
+  // console.log('this is nominal_gdp_target_series.toString()',nominal_gdp_target_series.toString());
 
   if ( r.config.treatment === 2  ) {
     // inflation_target_array = [[-4,r.config.inflation_target],[40,r.config.inflation_target]];
 
     $.plot($("#plot4"), [
       {
-        data: price_level_target_array,
+        data: price_level_target_series,
         color: orange,
         lines: { show:true, },
         points:{ show:false },
@@ -358,7 +368,7 @@ function replot() {
 
     $.plot($("#plot4"), [
       {
-        data: nominal_gdp_target_array,
+        data: nominal_gdp_target_series,
         color: orange,
         lines: { show:true, },
         points:{ show:false },
@@ -367,12 +377,12 @@ function replot() {
       //NOTE @ 1 March 2020: currently this is graphing output
       //but actually this graph should represent the NGDP)
       {
-        data: nominal_gdp_target_array,
+        data: nominal_gdp_target_series,
         color: green,
         label: "Nominal GDP"
       },
       {
-        data: price_level_target_array,
+        data: price_level_target_series,
         color: red,
         label: "Price Level"
       },
@@ -384,12 +394,12 @@ function replot() {
       //NOTE @ 1 March 2020: currently this is graphing output
       //but actually this graph should represent the NGDP)
       {
-        data: nominal_gdp_target_array,
+        data: nominal_gdp_target_series,
         color: green,
         label: "Nominal GDP"
       },
       {
-        data: price_level_target_array,
+        data: price_level_target_series,
         color: red,
         label: "Price Level"
       },
@@ -520,7 +530,7 @@ function handle_shock(msg) {
     let output;
     let interest_rate;
     let todays_price_level_target;
-    let todays_nominal_gdp_target;
+    let todays_nominal_gdp;
     let inflation_forecasts_for_all_players = [];
     let output_forecasts_for_all_players = [];
     
@@ -553,12 +563,14 @@ function handle_shock(msg) {
       inflation = r.config.F*median_inflation_prediction + 
                   r.config.G*output;
       interest_rate = r.config.phi_pi*inflation +
-                      r.config.phi_x*r.config.r_bar;
+                      r.config.phi_x*output+r.config.r_bar;
+      todays_price_level_target = price_level_target_series[subperiod-2][1]+inflation;
+      todays_nominal_gdp = nominal_gdp_target_series[subperiod-2][1]+todays_price_level_target;
       
       if ( interest_rate <= (Math.log(r.config.B)-(0.5/400)) ) {
+        interest_rate = -0.5/400;
         output = median_output_prediction + median_inflation_prediction + incoming_shock - interest_rate;
         inflation = r.config.beta*median_output_prediction + r.config.kappa*output;
-        interest_rate = -0.5/400;
       }
       // todays_price_level_target = config_price_level_target + inflation;
       // todays_nominal_gdp_target = config_nominal_gdp_target + output;
@@ -599,10 +611,16 @@ function handle_shock(msg) {
     } else if ( r.config.treatment === 4 ) {
       console.log('calculate interest with NGDP treatment')
     }
+
+    console.log('this is subperiod',subperiod);
+    console.log('right before pushing into price_level_target_series',price_level_target_series);
+    console.log('right before pushing into price_level_target_series.toString()',price_level_target_series.toString());
     
     interest_rate = Math.round(interest_rate);
     output = Math.round(output);
     inflation = Math.round(inflation);
+    todays_nominal_gdp = Math.round(todays_nominal_gdp)
+    todays_price_level_target = Math.round(todays_price_level_target)
 
     append(interest_rate_series,interest_rate);
     append(shock_series,incoming_shock);
@@ -610,7 +628,12 @@ function handle_shock(msg) {
     append(e_o_series, median_output_prediction);
     append(inflation_series, inflation);
     append(output_series, output);
+    price_level_target_series = appendSecondToLast(price_level_target_series,todays_price_level_target,subperiod);
+    nominal_gdp_target_series = appendSecondToLast(nominal_gdp_target_series,todays_nominal_gdp,subperiod);
     // append(output_forecast_series, output);
+
+    console.log('AFTER price_level_target_series',price_level_target_series);
+    console.log('AFTER price_level_target_series.toString()',price_level_target_series.toString());
     
     // console.log('begin calculating the score');
     // console.log('interest_rate',interest_rate);
@@ -807,17 +830,8 @@ function finish_sync() {
   
   //if its the first period, populate target variable arrays
   if ( period === 1 ) {
-    console.log('finish_sync called');
-    console.log('its this period',period);
-    //populate "target" variables arrays with the first batch of data
-    console.log('load target variable arrays!');
-    // console.log('price_level_target_array at load time',price_level_target_array)
-  
-    price_level_target_array.push([-4,r.config.price_level_target_array],[40,r.config.price_level_target_array]);
-    nominal_gdp_target_array.push([-4,r.config.nominal_gdp_target],[40,r.config.nominal_gdp_target]);
-
-    // loadTargetVariableArrays(price_level_target_array,r.config.price_level_target);
-    // loadTargetVariableArrays(nominal_gdp_target_array,r.config.nominal_gdp_target);
+    price_level_target_series.push([-4,r.config.price_level_target],[40,r.config.price_level_target]);
+    nominal_gdp_target_series.push([-4,r.config.nominal_gdp_target],[40,r.config.nominal_gdp_target]);
   }
   
   if (period <= r.config.subperiods) {
