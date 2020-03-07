@@ -161,18 +161,6 @@ let output_expectation_forecast_series = [];
 let nominal_gdp_series = [];
 let price_level_series = [];
 
-/**
- * @name loadTargetVariableArrays
- * @description Adds both dummy and config variable data to container arrays.
- *  For plotting price_level_target, nominal_gdp_target, and (possibly) inflation_target
- * @param {*} array 
- * @param {*} value 
- */
-
-function loadTargetVariableArrays(array,value){
-  console.log('hello friends');
-}
-
 var shockarray;
 
 //PRACTICE SEQUENCE:
@@ -340,9 +328,9 @@ function replot() {
 
   opts.legend.container = "#plot4-legend"
 
-  if ( r.config.treatment === 2  ) {
-    let price_level_target = [[-4,r.config.price_level_target],[40,r.config.price_level_target]];
+  let price_level_target = [[-4,r.config.price_level_target],[40,r.config.price_level_target]];
 
+  if ( r.config.treatment === 2  ) {
     $.plot($("#plot4"), [
       {
         data: price_level_series,
@@ -374,6 +362,13 @@ function replot() {
         color: green,
         label: "Nominal GDP"
       },
+      {
+        //NOTE @ 7 Mar
+        //though data is from price_level_target, label for data is nominal_gdp_target
+        data:price_level_target,
+        color:red,
+        label: "Nominal GDP Target"
+      }
     ], opts);
   } else {
     //treatment is either 1 or 3.
@@ -612,11 +607,25 @@ function handle_shock(msg) {
         inflation = r.config.beta * median_inflation_prediction + r.config.kappa * output;
       }
     } else if ( r.config.treatment === 4 ) {
-      console.log('calculate interest with NGDP treatment')
+      console.log('calculate interest with NGDP treatment');
+      output = r.config.V * median_output_prediction
+               + r.config.W * median_inflation_prediction
+               + r.config.Y * incoming_shock
+               + r.config.Z * r.config.r_bar
+               + r.config.AA * price_yesterday;
+      inflation = r.config.beta * median_inflation_prediction + r.config.kappa * output;
+      interest_rate = r.config.r_bar + r.config.phi_n * output + r.config.phi_n * price_yesterday + r.config.phi_n * inflation;
+      todays_nominal_gdp = output + price_yesterday + inflation;
+      todays_price_level = price_yesterday + inflation;
+
+      if ( interest_rate < 0 ) {
+        interest_rate = 0;
+        output = median_output_prediction + median_inflation_prediction + incoming_shock - interest_rate;
+        inflation = r.config.beta * median_inflation_prediction + r.config.kappa * output;
+        todays_nominal_gdp = output + todays_price_level;
+      }
     }
 
-    console.log('this is subperiod',subperiod);
-    
     interest_rate = Math.round(interest_rate);
     output = Math.round(output);
     inflation = Math.round(inflation);
@@ -632,27 +641,11 @@ function handle_shock(msg) {
     append(price_level_series,todays_price_level);
     append(nominal_gdp_series,todays_nominal_gdp);
 
-    // price_level_series = appendSecondToLast(price_level_series,todays_price_level,subperiod);
-    // nominal_gdp_series = appendSecondToLast(nominal_gdp_series,todays_nominal_gdp,subperiod);
-    // append(output_forecast_series, output);
-
-    // console.log('AFTER price_level_series',price_level_series);
-    // console.log('AFTER price_level_series.toString()',price_level_series.toString());
-    
-    // console.log('begin calculating the score');
-    // console.log('interest_rate',interest_rate);
-    // console.log('output',output);
-    // console.log('inflation',inflation);
-
     const players_last_output_forecast_num = parseInt(output_expectation_forecast_series[subperiod-2][1]);
     const players_last_inflation_forecast_num = parseInt(inflation_expectation_forecast_series[subperiod-2][1]);
     const absolute_forecast_error_output = Math.abs(players_last_output_forecast_num-output);
     const absolute_forecast_error_inflation = Math.abs(players_last_inflation_forecast_num-inflation);
     const score = 0.30*(2**(-0.01*absolute_forecast_error_output))+0.30*(2**(-0.01*absolute_forecast_error_inflation))
-
-    // console.log('absolute_forecast_error_output>>',absolute_forecast_error_output);
-    // console.log('absolute_forecast_error_inflation>>',absolute_forecast_error_inflation);
-    // console.log('score>>',score);
 
     r.set_points(r.points + score);
     r.send("points", score, { subperiod: subperiod});
