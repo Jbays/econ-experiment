@@ -559,35 +559,34 @@ function handle_shock(msg) {
       if ( interest_rate < 0 ) {
         interest_rate = 0;
         output = median_output_prediction + median_inflation_prediction + incoming_shock - interest_rate;
-      inflation = r.config.F*median_inflation_prediction +  r.config.G*output;           
-    todays_price_level = price_yesterday*(1+(inflation/10000));
-      todays_nominal_gdp = output+todays_price_level;
-     }
+        inflation = r.config.F*median_inflation_prediction + r.config.G*output;           
+        todays_price_level = price_yesterday*(1+(inflation/10000));
+        todays_nominal_gdp = output+todays_price_level;
+      }
     } else if ( r.config.treatment === 2 ) {
       console.log('calculate interest with PLT treatment')
 
-      output =  r.config.H * median_output_prediction + 
-                r.config.J*median_inflation_prediction + 
-                r.config.L*incoming_shock + 
-                r.config.M*r.config.r_bar
+      output =  r.config.H*median_output_prediction 
+                + r.config.J*median_inflation_prediction 
+                + r.config.L*incoming_shock 
+                + r.config.M*r.config.r_bar 
                 + r.config.N*price_yesterday;
-      inflation = r.config.beta*median_inflation_prediction + 
-                  r.config.kappa*output;
+      inflation = r.config.beta*median_inflation_prediction 
+                  + r.config.kappa*output;
       interest_rate = r.config.r_bar 
                       + r.config.phi_pi*price_yesterday
                       + r.config.phi_pi*inflation
                       + r.config.phi_x*output;
-           todays_price_level = price_yesterday*(1+(inflation/10000));
+      todays_price_level = price_yesterday*(1+(inflation/10000));
       todays_nominal_gdp = output+todays_price_level;
       
-      if ( interest_rate <= (Math.log(r.config.B)+r.config.elb) ) {
-        interest_rate = r.config.elb;
+      if ( interest_rate < 0 ) {
+        interest_rate = 0;
         output = median_output_prediction + median_inflation_prediction + incoming_shock - interest_rate;
         inflation = r.config.beta*median_output_prediction + r.config.kappa*output;
         todays_price_level = price_yesterday+inflation;
         todays_nominal_gdp = output+todays_price_level;
       }
-
     } else if ( r.config.treatment === 3 ) {
       console.log('calculate interest with AIT treatment')
     } else if ( r.config.treatment === 4 ) {
