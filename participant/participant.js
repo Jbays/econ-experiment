@@ -9,7 +9,7 @@
 
 ROBOTS = false;
 var rand;
-a
+
 // helper function to append point p to array a used in charts where points must be sequential, e.g. [[0, y1], [1, y2], [2, y3], ...]
 var append = function(a, p, s) {
   if (a.length === 0) {
@@ -560,8 +560,8 @@ function handle_shock(msg) {
         interest_rate = 0;
         output = median_output_prediction + median_inflation_prediction + incoming_shock - interest_rate;
         inflation = r.config.F*median_inflation_prediction + r.config.G*output;           
-        todays_price_level = price_yesterday*(1+(inflation/10000));
-        todays_nominal_gdp = output+todays_price_level;
+        // todays_price_level = price_yesterday*(1+(inflation/10000));
+        // todays_nominal_gdp = output+todays_price_level;
       }
     } else if ( r.config.treatment === 2 ) {
       console.log('calculate interest with PLT treatment')
@@ -589,13 +589,33 @@ function handle_shock(msg) {
       }
     } else if ( r.config.treatment === 3 ) {
       console.log('calculate interest with AIT treatment')
+      const lowercase_gamma = 1/5;
+      // const lowercase_gamma = ((subperiod-1) < 5 ) ? (1/(subperiod-1)) : 1/5;
+      const sum_of_last_four_inflations = inflation_expectation_forecast_series.slice(-4).reduce((prev,curr)=>{
+        return prev+parseInt(curr[1]);
+      })
+      
+      output = r.config.Q * median_output_prediction 
+               + r.config.R * median_inflation_prediction
+               + r.config.S * incoming_shock
+               + r.config.T * r.config.r_bar
+               + r.config.U * sum_of_last_four_inflations;
+      inflation = r.config.beta * median_inflation_prediction + r.config.kappa * output;
+      const inflation_average = lowercase_gamma * inflation + lowercase_gamma * sum_of_last_four_inflations;
+      interest_rate = r.config.r_bar + r.config.phi_pi * inflation_average + r.config.phi_x * output;
+      todays_price_level = price_yesterday*(1+(inflation/10000));
+      todays_nominal_gdp = output + todays_price_level;
+
+      if ( interest_rate < 0 ) {
+        interest_rate = 0;
+        output = median_output_prediction + median_inflation_prediction + incoming_shock - interest_rate;
+        inflation = r.config.beta * median_inflation_prediction + r.config.kappa * output;
+      }
     } else if ( r.config.treatment === 4 ) {
       console.log('calculate interest with NGDP treatment')
     }
 
     console.log('this is subperiod',subperiod);
-    // console.log('right before pushing into price_level_series',price_level_series);
-    // console.log('right before pushing into price_level_series.toString()',price_level_series.toString());
     
     interest_rate = Math.round(interest_rate);
     output = Math.round(output);
@@ -611,6 +631,7 @@ function handle_shock(msg) {
     append(output_series, output);
     append(price_level_series,todays_price_level);
     append(nominal_gdp_series,todays_nominal_gdp);
+
     // price_level_series = appendSecondToLast(price_level_series,todays_price_level,subperiod);
     // nominal_gdp_series = appendSecondToLast(nominal_gdp_series,todays_nominal_gdp,subperiod);
     // append(output_forecast_series, output);
