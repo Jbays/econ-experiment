@@ -9,7 +9,7 @@
 
 ROBOTS = false;
 var rand;
-
+a
 // helper function to append point p to array a used in charts where points must be sequential, e.g. [[0, y1], [1, y2], [2, y3], ...]
 var append = function(a, p, s) {
   if (a.length === 0) {
@@ -267,6 +267,7 @@ function replot() {
   var blue = "#3465a4";
   var green = "#00ff00";
   var orange = "#FFA500";
+  var pink = "#ce00bc";
 
   // places the legend outside the plot, in the DOM
   opts.legend.container = "#plot1-legend";
@@ -332,7 +333,7 @@ function replot() {
     },
     {
       data: output_expectation_forecast_series,
-      color: orange,
+      color: blue,
       label: "Output Forecast"
     },
   ], opts);
@@ -345,7 +346,7 @@ function replot() {
     $.plot($("#plot4"), [
       {
         data: price_level_series,
-        color: orange,
+        color: pink,
         label: "Price Level"
       },
       {
@@ -365,7 +366,7 @@ function replot() {
     $.plot($("#plot4"), [
       {
         data: price_level_series,
-        color: red,
+        color: pink,
         label: "Price Level"
       },
       {
@@ -387,7 +388,7 @@ function replot() {
       },
       {
         data: price_level_series,
-        color: red,
+        color: pink,
         label: "Price Level"
       },
     ], opts);
@@ -555,11 +556,13 @@ function handle_shock(msg) {
       todays_price_level = price_yesterday*(1+(inflation/10000));
       todays_nominal_gdp = output+todays_price_level;
       
-      if ( interest_rate <= (Math.log(r.config.beta)+r.config.elb) ) {
-        interest_rate = r.config.elb;
+      if ( interest_rate < 0 ) {
+        interest_rate = 0;
         output = median_output_prediction + median_inflation_prediction + incoming_shock - interest_rate;
-        inflation = r.config.beta*median_output_prediction + r.config.kappa*output;
-      }
+      inflation = r.config.F*median_inflation_prediction +  r.config.G*output;           
+    todays_price_level = price_yesterday*(1+(inflation/10000));
+      todays_nominal_gdp = output+todays_price_level;
+     }
     } else if ( r.config.treatment === 2 ) {
       console.log('calculate interest with PLT treatment')
 
@@ -574,18 +577,19 @@ function handle_shock(msg) {
                       + r.config.phi_pi*price_yesterday
                       + r.config.phi_pi*inflation
                       + r.config.phi_x*output;
-      todays_price_level = price_yesterday+inflation;
+           todays_price_level = price_yesterday*(1+(inflation/10000));
       todays_nominal_gdp = output+todays_price_level;
       
       if ( interest_rate <= (Math.log(r.config.B)+r.config.elb) ) {
         interest_rate = r.config.elb;
         output = median_output_prediction + median_inflation_prediction + incoming_shock - interest_rate;
         inflation = r.config.beta*median_output_prediction + r.config.kappa*output;
+        todays_price_level = price_yesterday+inflation;
+        todays_nominal_gdp = output+todays_price_level;
       }
 
     } else if ( r.config.treatment === 3 ) {
       console.log('calculate interest with AIT treatment')
-      // output = Q*median_output_prediction+R*median_inflation_prediction+S*incoming_shock+T*r.config.r_bar+U*
     } else if ( r.config.treatment === 4 ) {
       console.log('calculate interest with NGDP treatment')
     }
@@ -650,6 +654,10 @@ function handle_shock(msg) {
         interest_rate: interest_rate,
         output: output,
         inflation: inflation,
+        todays_nominal_gdp: todays_nominal_gdp,
+        todays_price_level: todays_price_level,
+        
+        
       });
     }
   }
