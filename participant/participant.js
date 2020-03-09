@@ -165,13 +165,13 @@ var shockarray;
 
 //PRACTICE SEQUENCE:
 //CHANGE THE SHOCK ARRAY AND PERIOD 1 OF THE SHOCK_SERIES:
-shockarray = [8,83,-131,-29,-40,-146,-88,-299,-449,-410,-364,-361,-432,-208,-328,-172,5,3,14,-42,-218,-130,52,257,90,-162,-70,9,-25,-164];
-var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,8]];
+//shockarray = [8,83,-131,-29,-40,-146,-88,-299,-449,-410,-364,-361,-432,-208,-328,-172,5,3,14,-42,-218,-130,52,257,90,-162,-70,9,-25,-164];
+//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,8]];
 
 //SHOCK SEQUENCE 1:
 //Sequence 1a:
-//shockarray = [133,59,-60,143,52,-48,-66,-148,-231,199,330,229,-34,-133,-99,47,-148,-389,-412,-191,-58,26,-2,23,-49,85,-130,-15,-119,-112];
-//var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0], [1,133]];
+shockarray = [249,286,254,168,109,12,75,89,170,142,167,119,310,219,219,291,305,173,171,-329,-288,-201,-97,-86,-8,25,65,124,341,445,472,429,506,330,215,229,343,257,357,139,158,32,142,159,174,148,145,225,280,337];
+var shock_series = [[-4, 0], [-3, 0], [-2, 0], [-1, 0], [0,0]];
 
 //Sequence 1b:
 //shockarray = [24,-191,-120,142,94,59,-63,-40,8,60,-14,-39,243,-157,202,160,222,-92,-129,-110,-7,-223,-65,-196,-103,27,58,175,231,47];
@@ -239,7 +239,7 @@ function replot() {
     },
     xaxis: {
       min: -4,
-      max: Math.max(40, inflation_series.length),
+      max: Math.max(50, inflation_series.length),
       minTickSize: 1,
       tickDecimals: 0,
       tickFormatter: function(tick) {
@@ -274,7 +274,7 @@ function replot() {
   opts.legend.container = "#plot2-legend"; 
 
   if ( r.config.treatment === 1 || r.config.treatment === 3  ) {
-    let inflation_target_array = [[-4,r.config.inflation_target],[40,r.config.inflation_target]];
+    let inflation_target_array = [[-4,r.config.inflation_target],[54,r.config.inflation_target]];
 
     $.plot($("#plot2"), [
       {
@@ -328,7 +328,7 @@ function replot() {
 
   opts.legend.container = "#plot4-legend"
 
-  let price_level_target = [[-4,r.config.price_level_target],[40,r.config.price_level_target]];
+  let price_level_target = [[-4,r.config.price_level_target],[54,r.config.price_level_target]];
 
   if ( r.config.treatment === 2  ) {
     $.plot($("#plot4"), [
@@ -344,7 +344,7 @@ function replot() {
       },
       {
         data:price_level_target,
-        color:red,
+        color:orange,
         label: "Price Level Target"
       }
     ], opts);
@@ -366,25 +366,28 @@ function replot() {
         //NOTE @ 7 Mar
         //though data is from price_level_target, label for data is nominal_gdp_target
         data:price_level_target,
-        color:red,
+        color:orange,
         label: "Nominal GDP Target"
       }
     ], opts);
   } else {
     //treatment is either 1 or 3.
 
+    //make special opts for plot4
+    opts.yaxes = [{position:"right"},{position:"left"}]
+
     $.plot($("#plot4"), [
-      //NOTE @ 1 March 2020: currently this is graphing output
-      //but actually this graph should represent the NGDP)
       {
         data: nominal_gdp_series,
         color: green,
-        label: "Nominal GDP"
+        label: "Nominal GDP",
+        yaxis:1,
       },
       {
         data: price_level_series,
         color: pink,
-        label: "Price Level"
+        label: "Price Level",
+        yaxis:2,
       },
     ], opts);
   }
@@ -669,8 +672,6 @@ function handle_shock(msg) {
         inflation: inflation,
         todays_nominal_gdp: todays_nominal_gdp,
         todays_price_level: todays_price_level,
-        
-        
       });
     }
   }
