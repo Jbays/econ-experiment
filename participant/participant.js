@@ -148,8 +148,9 @@ let inflation_expectation_forecast_series = [];
 // Participant's output forecast
 let output_expectation_forecast_series = [];
 
-let nominal_gdp_series = [];
-let price_level_series = [];
+let nominal_gdp_series = [[-4,1000],[-3,1000],[-2,1000],[-1,1000],[0,0]];
+let price_level_series = [[-4,1000],[-3,1000],[-2,1000],[-1,1000],[0,0]];
+// var price_level_series = [];
 
 var shockarray;
 
@@ -525,11 +526,11 @@ function handle_shock(msg) {
     let median_inflation_prediction = median(inflation_forecasts_for_all_players); 
     let median_output_prediction = median(output_forecasts_for_all_players);
     
-    //yesterday's price or zero
-    console.log('price_level_series',price_level_series);
-    console.log('subperiod',subperiod);
-    console.log('price_level_series[subperiod-2][1]',price_level_series[subperiod-2][1]);
-    const price_yesterday= (price_level_series.length >= 2) ? price_level_series[subperiod-2][1] : 0
+    
+    //this logic seems questionable.
+    // const price_yesterday= (price_level_series.length >= 2) ? price_level_series[subperiod-2][1] : 0
+    const price_yesterday= price_level_series[subperiod-2][1];
+    // const price_yesterday= 0;
     
     if ( r.config.treatment === 1 ) {
       console.log('calculate interest with IT treatment');
@@ -730,7 +731,6 @@ function finish_sync() {
       $("#submit_input").attr("disabled", "disabled");
       // original
       let subperiod = parseInt($(".period").text(), 10);
-      
       r.send("forecast", { 
         subperiod: subperiod, 
         inflation_expectation: inflation_expectation, 
@@ -822,12 +822,20 @@ function finish_sync() {
     }
   }, 500);
   var period = parseInt($(".period").text(), 10);
+  //HACK: 10 MARCH 2019 "ADDING OR LOGIC TO CONDITIONAL"
+  //this will populate both arrays if one of the arrays is ever found to be zero.
+  // if ( period === 1 || price_level_series.length === 0 ) {
+
+  //HACK: 10 MARCH 2019 "ADDING OR LOGIC TO CONDITIONAL"
+  //this will populate both arrays if one of the arrays is ever found to be zero.
+  // if ( period === 1 || price_level_series.length === 0 ) {
   
   //if its the first period, populate target variable arrays
-  if ( period === 1 || price_level_series.length === 0 ) {
-    price_level_series.push([-4,r.config.starting_price_level],[-3,r.config.starting_price_level],[-2,r.config.starting_price_level],[-1,r.config.starting_price_level],[0,r.config.starting_price_level]);
-    nominal_gdp_series.push([-4,r.config.starting_nominal_gdp],[-3,r.config.starting_nominal_gdp],[-2,r.config.starting_nominal_gdp],[-1,r.config.starting_nominal_gdp],[0,r.config.starting_nominal_gdp]);
-  }
+  
+  // if ( period === 1 || (period+2) >= price_level_series.length ) {
+  //   price_level_series.push([-4,r.config.starting_price_level],[-3,r.config.starting_price_level],[-2,r.config.starting_price_level],[-1,r.config.starting_price_level],[0,r.config.starting_price_level]);
+  //   nominal_gdp_series.push([-4,r.config.starting_nominal_gdp],[-3,r.config.starting_nominal_gdp],[-2,r.config.starting_nominal_gdp],[-1,r.config.starting_nominal_gdp],[0,r.config.starting_nominal_gdp]);
+  // }
   
   if (period <= r.config.subperiods) {
     if (ROBOTS && typeof robots === "undefined") {
