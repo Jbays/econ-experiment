@@ -510,13 +510,7 @@ function handle_shock(msg) {
     let output_forecasts_for_all_players = [];
     
     let incoming_shock = shockarray[subperiod-2];
-    // console.log('this is incoming_shock',incoming_shock);
   
-    // this does NOT need to be equal to r.config.price_level_target, etc.
-    // this DOES need to be equal to the last price_level_target graphed.
-    // const config_price_level_target = r.config.price_level_target;
-    // const config_nominal_gdp_target = r.config.nominal_gdp_target;
-
     //what does this do?  related to the variables above...
     for (let subject in forecasts) {
       if (forecasts[subject].inflation_expectation !== null && forecasts[subject].output_expectation !== null) {
@@ -530,7 +524,12 @@ function handle_shock(msg) {
     //takes the median prediction for the group in that given period
     let median_inflation_prediction = median(inflation_forecasts_for_all_players); 
     let median_output_prediction = median(output_forecasts_for_all_players);
-    const price_yesterday= price_level_series[subperiod-2][1]
+    
+    //yesterday's price or zero
+    console.log('price_level_series',price_level_series);
+    console.log('subperiod',subperiod);
+    console.log('price_level_series[subperiod-2][1]',price_level_series[subperiod-2][1]);
+    const price_yesterday= (price_level_series.length >= 2) ? price_level_series[subperiod-2][1] : 0
     
     if ( r.config.treatment === 1 ) {
       console.log('calculate interest with IT treatment');
@@ -626,18 +625,11 @@ function handle_shock(msg) {
     todays_nominal_gdp = Math.round(todays_nominal_gdp)
     todays_price_level = Math.round(todays_price_level)
 
-    console.log('this is shock_series',shock_series);
-    console.log('subperiod>>>',subperiod);
-    if ( subperiod === 2 ) {
-      console.log('this is shock_series.toString()',shock_series.toString());
-      shock_series.pop();
-      shock_series.unshift([-5,0]);
-      console.log('after pop --> shock_series.toString()',shock_series.toString());
-    }
-    console.log('after pop --> shock_series',shock_series);
-
     append(interest_rate_series,interest_rate);
-    append(shock_series,incoming_shock);
+    //don't append this incoming_shock (because it's already appended)
+    //instead, append the NEXT shock in the shockarray
+    append(shock_series,shockarray[subperiod-1]);
+
     append(e_i_series, median_inflation_prediction);
     append(e_o_series, median_output_prediction);
     append(inflation_series, inflation);
@@ -832,7 +824,7 @@ function finish_sync() {
   var period = parseInt($(".period").text(), 10);
   
   //if its the first period, populate target variable arrays
-  if ( period === 1 ) {
+  if ( period === 1 || price_level_series.length === 0 ) {
     price_level_series.push([-4,r.config.starting_price_level],[-3,r.config.starting_price_level],[-2,r.config.starting_price_level],[-1,r.config.starting_price_level],[0,r.config.starting_price_level]);
     nominal_gdp_series.push([-4,r.config.starting_nominal_gdp],[-3,r.config.starting_nominal_gdp],[-2,r.config.starting_nominal_gdp],[-1,r.config.starting_nominal_gdp],[0,r.config.starting_nominal_gdp]);
   }
