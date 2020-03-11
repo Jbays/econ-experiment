@@ -148,8 +148,8 @@ let inflation_expectation_forecast_series = [];
 // Participant's output forecast
 let output_expectation_forecast_series = [];
 
-let nominal_gdp_series = [[-4,1000],[-3,1000],[-2,1000],[-1,1000],[0,0]];
-let price_level_series = [[-4,1000],[-3,1000],[-2,1000],[-1,1000],[0,0]];
+let nominal_gdp_series = [[-4,1000],[-3,1000],[-2,1000],[-1,1000],[0,1000]];
+let price_level_series = [[-4,1000],[-3,1000],[-2,1000],[-1,1000],[0,1000]];
 // var price_level_series = [];
 
 var shockarray;
@@ -526,11 +526,7 @@ function handle_shock(msg) {
     let median_inflation_prediction = median(inflation_forecasts_for_all_players); 
     let median_output_prediction = median(output_forecasts_for_all_players);
     
-    
-    //this logic seems questionable.
-    // const price_yesterday= (price_level_series.length >= 2) ? price_level_series[subperiod-2][1] : 0
-    const price_yesterday= price_level_series[subperiod-2][1];
-    // const price_yesterday= 0;
+    const price_yesterday= price_level_series.slice(-1)[0][1];
     
     if ( r.config.treatment === 1 ) {
       console.log('calculate interest with IT treatment');
@@ -538,8 +534,7 @@ function handle_shock(msg) {
                 r.config.B*median_inflation_prediction + 
                 r.config.C*incoming_shock + 
                 r.config.D*r.config.r_bar;
-      inflation = r.config.F*median_inflation_prediction + 
-                  r.config.G*output;
+      inflation = r.config.F*median_inflation_prediction + r.config.G*output;
       interest_rate = r.config.phi_pi*inflation +
                       r.config.phi_x*output+r.config.r_bar;
       todays_price_level = price_yesterday*(1+(inflation/10000));
