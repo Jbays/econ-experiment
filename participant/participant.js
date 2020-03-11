@@ -544,8 +544,8 @@ function handle_shock(msg) {
         interest_rate = 0;
         output = median_output_prediction + median_inflation_prediction + incoming_shock - interest_rate;
         inflation = r.config.F*median_inflation_prediction + r.config.G*output;           
-        // todays_price_level = price_yesterday*(1+(inflation/10000));
-        // todays_nominal_gdp = output+todays_price_level;
+        todays_price_level = price_yesterday*(1+(inflation/10000));
+        todays_nominal_gdp = output+todays_price_level;
       }
     } else if ( r.config.treatment === 2 ) {
       console.log('calculate interest with PLT treatment')
