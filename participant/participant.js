@@ -577,8 +577,8 @@ function handle_shock(msg) {
       // const lowercase_gamma = ((subperiod-1) < 5 ) ? (1/(subperiod-1)) : 1/5;
       const sum_of_last_four_inflations = inflation_expectation_forecast_series.slice(-4).reduce((prev,curr)=>{
         return prev+parseInt(curr[1]);
-      })
-      
+      },0)
+
       output = r.config.Q * median_output_prediction 
                + r.config.R * median_inflation_prediction
                + r.config.S * incoming_shock
@@ -594,6 +594,8 @@ function handle_shock(msg) {
         interest_rate = 0;
         output = median_output_prediction + median_inflation_prediction + incoming_shock - interest_rate;
         inflation = r.config.beta * median_inflation_prediction + r.config.kappa * output;
+        todays_price_level = price_yesterday*(1+(inflation/10000));
+        todays_nominal_gdp = output + todays_price_level;
       }
     } else if ( r.config.treatment === 4 ) {
       console.log('calculate interest with NGDP treatment');
@@ -604,13 +606,14 @@ function handle_shock(msg) {
                + r.config.AA * price_yesterday;
       inflation = r.config.beta * median_inflation_prediction + r.config.kappa * output;
       interest_rate = r.config.r_bar + r.config.phi_n * output + r.config.phi_n * price_yesterday + r.config.phi_n * inflation;
+      todays_price_level = price_yesterday*(1+(inflation/10000));;
       todays_nominal_gdp = output + price_yesterday + inflation;
-      todays_price_level = price_yesterday + inflation;
 
       if ( interest_rate < 0 ) {
         interest_rate = 0;
         output = median_output_prediction + median_inflation_prediction + incoming_shock - interest_rate;
         inflation = r.config.beta * median_inflation_prediction + r.config.kappa * output;
+        todays_price_level = price_yesterday*(1+(inflation/10000));
         todays_nominal_gdp = output + todays_price_level;
       }
     }
