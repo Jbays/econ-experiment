@@ -642,8 +642,12 @@ function handle_shock(msg) {
     const absolute_forecast_error_inflation = Math.abs(players_last_inflation_forecast_num-inflation);
     const score = 0.30*(2**(-0.01*absolute_forecast_error_output))+0.30*(2**(-0.01*absolute_forecast_error_inflation))
 
-    r.set_points(r.points + score);
-    r.send("points", score, { subperiod: subperiod});
+    //if its the beginning of the third period or after, send points
+    if ( subperiod >= 3 ) {
+      r.set_points(r.points + score);
+      r.send("points", score, { subperiod: subperiod});
+    }
+
     
     //at some point, forecasts is overwriting one_previous_forecast
     for (subject in forecasts) {
