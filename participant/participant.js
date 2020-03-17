@@ -263,6 +263,8 @@ function replot() {
 
   opts.legend.container = "#plot2-legend"; 
 
+  //NOTE: 16 MAR 2020 
+  //with a fifth treatment, will this logic create unintended consequences?
   if ( r.config.treatment === 1 || r.config.treatment === 3  ) {
     let inflation_target_array = [[-4,r.config.inflation_target],[54,r.config.inflation_target]];
 
@@ -301,24 +303,46 @@ function replot() {
     ], opts);
   }
 
-
   opts.legend.container = "#plot3-legend"
-  $.plot($("#plot3"), [
-    {
-      data: output_series,
-      color: red,
-      label: "Output"
-    },
-    {
-      data: output_expectation_forecast_series,
-      color: blue,
-      label: "Output Forecast"
-    },
-  ], opts);
+
+  if ( r.config.treatment === 5 ) {
+    let output_target_line_array = [[-4,r.config.output_target],[54,r.config.output_target]]
+
+    $.plot($("#plot3"), [
+      {
+        data: output_series,
+        color: red,
+        label: "Output"
+      },
+      {
+        data: output_expectation_forecast_series,
+        color: blue,
+        label: "Output Forecast"
+      },
+      {
+        data: output_target_line_array,
+        color: orange,
+        label: "Output Target"
+      },
+    ], opts);
+  } else {
+    $.plot($("#plot3"), [
+      {
+        data: output_series,
+        color: red,
+        label: "Output"
+      },
+      {
+        data: output_expectation_forecast_series,
+        color: blue,
+        label: "Output Forecast"
+      },
+    ], opts);
+  }
 
   opts.legend.container = "#plot4-legend"
 
-  let price_level_target = [[-4,r.config.price_level_target],[54,r.config.price_level_target]];
+  let price_level_target_line_array = [[-4,r.config.price_level_target],[54,r.config.price_level_target]];
 
   if ( r.config.treatment === 2  ) {
     $.plot($("#plot4"), [
@@ -333,7 +357,7 @@ function replot() {
         label: "NGDP"
       },
       {
-        data:price_level_target,
+        data:price_level_target_line_array,
         color:orange,
         label: "Price Level Target"
       }
@@ -354,8 +378,8 @@ function replot() {
       },
       {
         //NOTE @ 7 Mar
-        //though data is from price_level_target, label for data is nominal_gdp_target
-        data:price_level_target,
+        //though data is from price_level_target_line_array, label for data is nominal_gdp_target
+        data:price_level_target_line_array,
         color:orange,
         label: "Nominal GDP Target"
       }
@@ -527,7 +551,7 @@ function handle_shock(msg) {
     let median_output_prediction = median(output_forecasts_for_all_players);
     
     const price_yesterday= price_level_series.slice(-1)[0][1];
-    
+
     if ( r.config.treatment === 1 ) {
       console.log('calculate interest with IT treatment');
       output =  r.config.A * median_output_prediction + 
@@ -617,6 +641,24 @@ function handle_shock(msg) {
         inflation = r.config.beta * median_inflation_prediction + r.config.kappa * output;
         todays_price_level = price_yesterday*(1+(inflation/10000));
         todays_nominal_gdp = output + todays_price_level;
+      }
+    } else if ( r.config.treatment === 5 ) {
+      console.log('calculate interest with dual mandate treatment');
+      output =  r.config.A * median_output_prediction + 
+                r.config.B*median_inflation_prediction + 
+                r.config.C*incoming_shock + 
+                r.config.D*r.config.r_bar;
+      inflation = r.config.F*median_inflation_prediction + r.config.G*output;
+      interest_rate = r.config.phi_pi*inflation +
+                      r.config.phi_x*output+r.config.r_bar;
+      todays_price_level = price_yesterday*(1+(inflation/10000));
+      todays_nominal_gdp = output+todays_price_level;
+      if ( interest_rate < 0 ) {
+        interest_rate = 0;
+        output = median_output_prediction + median_inflation_prediction + incoming_shock - interest_rate;
+        inflation = r.config.F*median_inflation_prediction + r.config.G*output;           
+        todays_price_level = price_yesterday*(1+(inflation/10000));
+        todays_nominal_gdp = output+todays_price_level;
       }
     }
 
