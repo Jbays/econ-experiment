@@ -554,13 +554,15 @@ function handle_shock(msg) {
                 + r.config.J*median_inflation_prediction 
                 + r.config.L*incoming_shock 
                 + r.config.M*r.config.r_bar 
-                + r.config.N*price_yesterday;
+                + r.config.N*price_yesterday
+                + r.config.O*1000;
       inflation = r.config.beta*median_inflation_prediction 
                   + r.config.kappa*output;
       interest_rate = r.config.r_bar 
                       + r.config.phi_pi*price_yesterday
                       + r.config.phi_pi*inflation
-                      + r.config.phi_x*output;
+                      + r.config.phi_x*output
+                      + r.config.phi_pi*1000;
       todays_price_level = price_yesterday*(1+(inflation/10000));
       todays_nominal_gdp = output+todays_price_level;
       
@@ -574,8 +576,8 @@ function handle_shock(msg) {
     } else if ( r.config.treatment === 3 ) {
       console.log('calculate interest with AIT treatment')
       const lowercase_gamma = 1/5;
-      // const lowercase_gamma = ((subperiod-1) < 5 ) ? (1/(subperiod-1)) : 1/5;
-      const sum_of_last_four_inflations = inflation_expectation_forecast_series.slice(-4).reduce((prev,curr)=>{
+      //configured to take the last three inflation values
+      const sum_of_last_four_inflations = inflation_series.slice(-3).reduce((prev,curr)=>{
         return prev+parseInt(curr[1]);
       },0)
 
@@ -648,7 +650,6 @@ function handle_shock(msg) {
       r.send("points", score, { subperiod: subperiod});
     }
 
-    
     //at some point, forecasts is overwriting one_previous_forecast
     for (subject in forecasts) {
       one_previous_forecast[subject] = forecasts[subject];
